@@ -1,5 +1,4 @@
 # first-door
 Both Doors &amp; First Door Puzzle
 
-First door puzzle:
-Puzzle to get from anteroom into lab room
+For further information see document "ideas_and_concepts.docx"
