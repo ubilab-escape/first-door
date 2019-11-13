@@ -1,0 +1,42 @@
+//--------------Ubilab - Escape Room WS 2019---------------------
+//-----------Group 4 - Both doors + Entry Puzzle-----------------
+//Code for motor control of the sliding door (Anteroom --> Labroom) 
+
+
+//Define pin connections
+#define enPin 1
+#define dirPin 2
+#define pulPin 3
+#define stepsPerRotation 100
+#define totalRotations 5
+#define turningSpeed 100 //Delay between steps
+
+
+
+
+
+void setup() {
+  // Pin declaration
+  pinMode(enPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  pinMode(pulPin, OUTPUT);
+  
+  //Enable Driving Stage
+  digitalWrite(enPin, LOW);
+}
+
+
+
+void loop() {
+  
+  // Set spinning direction (High->Clockwise / LOW->Counterclockwise)
+  digitalWrite(dirPin, HIGH);
+
+  for(int i =0; i<= totalRotations*stepsPerRotation; i++) {
+  digitalWrite(pulPin, HIGH);
+  delayMicroseconds(turningSpeed); 
+  digitalWrite(pulPin, LOW);
+  delayMicroseconds(turningSpeed);
+  }
+
+}
