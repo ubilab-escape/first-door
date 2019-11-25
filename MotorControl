@@ -3,40 +3,345 @@
 //Code for motor control of the sliding door (Anteroom --> Labroom) 
 
 
+//Input Commands for control of the Door:
+//    -open
+//    -close
+//    -stop
+
+
+
 //Define pin connections
-#define enPin 1
-#define dirPin 2
-#define pulPin 3
-#define stepsPerRotation 100
-#define totalRotations 5
-#define turningSpeed 100 //Delay between steps
+#define enPin 25
+#define dirPin 32
+#define pulPin 33
+#define interruptOpenPin 26
+#define interruptClosePin 27
+
+
+
+// Velocity is calculated in steps/sec ---> Velocity/200 is equal to turns per second
+const int calVelocity = 600; //3 turns per second
+const int maxVelocity =1000; //5 turns per second
+
+//Acceleration
+int accelSteps = 600; //acceleration during the first three turns
+const double pi = 3.1415926535;
+
+//Position
+int currentPosition; //location coordinate
+int maxDistance; //Maximum distance in steps
+int stepsBack = 200; //Number of steps backwards after touching the end. This was implemented that the switch is not pressed the whole time
+
+
+//Input variables and commands
+String openDoor = "open";
+String closeDoor = "close";
+String stopDoor = "stop";
+
+String inputCommand;
+bool newInput = false;
+
+
+//Interrupt variables
+volatile int interruptFlagO = 0;
+volatile int interruptFlagC = 0;
+
+
+
+
+
 
 
 
 
 
 void setup() {
-  // Pin declaration
+  
+  Serial.begin(115200);
+
+  //Pin declaration
   pinMode(enPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
   pinMode(pulPin, OUTPUT);
+  pinMode(interruptOpenPin, INPUT_PULLUP);
+  pinMode(interruptClosePin, INPUT_PULLUP);
   
   //Enable Driving Stage
-  digitalWrite(enPin, LOW);
+  digitalWrite(enPin, LOW); 
+ 
+  //Interrupt for door stop detection
+  attachInterrupt(digitalPinToInterrupt(interruptOpenPin),interruptOpen,CHANGE); //Interrupt at the end of door opening due to switch touching
+  attachInterrupt(digitalPinToInterrupt(interruptClosePin),interruptClose,CHANGE); //Interrupt at the end of door closing due to switch touching
+
+  //Measure the distance between open and close in steps
+  calibration();
+  
 }
 
 
 
-void loop() {
-  
-  // Set spinning direction (High->Clockwise / LOW->Counterclockwise)
-  digitalWrite(dirPin, HIGH);
 
-  for(int i =0; i<= totalRotations*stepsPerRotation; i++) {
-  digitalWrite(pulPin, HIGH);
-  delayMicroseconds(turningSpeed); 
-  digitalWrite(pulPin, LOW);
-  delayMicroseconds(turningSpeed);
+
+
+
+
+
+
+void loop() 
+  {
+
+
+    checkSerialMonitor(); //check serial monitor for new command
+
+    if(newInput == true)
+      {
+    
+        if(inputCommand = openDoor) //open door 
+          {
+          openDoorFunc();
+          }
+          
+        else if(inputCommand = closeDoor) //close door
+          {
+          closeDoorFunc();
+          }
+
+        else if(inputCommand = stopDoor) //close door
+          {
+          stopDoorFunc();
+          }
+        
+      }
+ 
+    
+  }
+    
+
+
+
+
+
+
+
+    
+//Funktionen
+
+void interruptOpen()
+  {
+  interruptFlagO++;
+  Serial.println("An interrupt (open) has occurred!");
+  Serial.println("Counter:");
+  Serial.println(interruptFlagO);
   }
 
-}
+void interruptClose()
+  {
+  interruptFlagC++;
+  Serial.println("An interrupt (close) has occurred!");
+  Serial.println("Counter:");
+  Serial.println(interruptFlagC);
+  }
+
+
+
+
+
+void calibration()
+  {
+    // Set spinning direction to open 
+    digitalWrite(dirPin, HIGH);
+
+    double calVelDelay = 1/(calVelocity *2*pow(10,-6));
+    int calVelDelay2 = calVelDelay;
+    
+    //Door moves on to starting point (door completely open)
+    while (interruptFlagO == 0) 
+      {
+      Serial.println("Calibration in progress!");
+      digitalWrite(pulPin, HIGH);
+      delayMicroseconds(calVelDelay2); 
+      digitalWrite(pulPin, LOW);
+      delayMicroseconds(calVelDelay2);    
+      }
+
+
+    // Set spinning direction to close 
+    digitalWrite(dirPin, LOW);
+    delay(1000);
+    //Reset of calibration parameters
+    currentPosition=0;
+
+
+    //Door moves from starting point to end point and measures the number of steps
+    while (interruptFlagC == 0) 
+      {
+      Serial.println("Calibration in progress!");
+      digitalWrite(pulPin, HIGH);
+      delayMicroseconds(calVelDelay2); 
+      digitalWrite(pulPin, LOW);
+      delayMicroseconds(calVelDelay2);
+      currentPosition++;    
+      }
+
+      
+    maxDistance = currentPosition;
+    currentPosition = 0;
+    digitalWrite(dirPin, HIGH);
+    delay (1000);
+
+
+    for (int c = 0; c <= stepsBack; c++)
+      {
+      Serial.println("Calibration in progress!");
+      digitalWrite(pulPin, HIGH);
+      delayMicroseconds(calVelDelay2); 
+      digitalWrite(pulPin, LOW);
+      delayMicroseconds(calVelDelay2);
+      }
+    
+    
+    interruptFlagO = 0;
+    interruptFlagC = 0;
+    Serial.println("Calibration done!");
+    }
+
+
+
+
+
+
+void checkSerialMonitor()
+  {
+    if(Serial.available()>0)  
+      {
+      inputCommand = Serial.readString(); //save serial communication in variable
+      Serial.println("Receive input:");
+      Serial.println(inputCommand);
+      newInput = true; 
+      }
+   }
+
+
+
+
+void closeDoorFunc()
+  {
+    newInput = false;
+    Serial.println("Door closes!");
+
+    // Set spinning direction  
+    digitalWrite(dirPin, LOW);
+
+    //Calculation of the delays for steppermotor
+    double maxVelDelay = 1/(maxVelocity *2*pow(10,-6));
+    int maxVelDelay2 = maxVelDelay;
+
+    //Door movement  
+    for(int i = 0; i < currentPosition; i++) 
+      {
+      digitalWrite(pulPin, HIGH);
+      delayMicroseconds(maxVelDelay2); 
+      digitalWrite(pulPin, LOW);
+      delayMicroseconds(maxVelDelay2);
+
+      currentPosition = currentPosition - 1;
+
+      checkSerialMonitor();
+
+      if(newInput == true)
+        {
+        break;  
+        }
+
+      if(interruptFlagC > 0)
+        {
+        break;
+        }
+      }
+    
+    
+    digitalWrite(dirPin, HIGH);
+    delay (1000);
+
+    if ((newInput == false) && (interruptFlagC ==0))
+      {
+        for (int i = 0; i <= stepsBack; i++)
+          {
+          digitalWrite(pulPin, HIGH);
+          delayMicroseconds(maxVelDelay2); 
+          digitalWrite(pulPin, LOW);
+          delayMicroseconds(maxVelDelay2);
+
+          currentPosition++;
+          }
+      }
+    interruptFlagC = 0;
+
+    Serial.println("Door closed!");
+  }
+
+
+void openDoorFunc()
+  {
+    newInput = false;
+    Serial.println("Door opens!");
+
+    // Set spinning direction  
+    digitalWrite(dirPin, HIGH);
+
+    //Calculation of the delays for steppermotor
+    double maxVelDelay = 1/(maxVelocity *2*pow(10,-6));
+    int maxVelDelay2 = maxVelDelay;
+
+    //Door movement  
+    for(int i = currentPosition; i<= maxDistance; i++) 
+      {
+      digitalWrite(pulPin, HIGH);
+      delayMicroseconds(maxVelDelay2); 
+      digitalWrite(pulPin, LOW);
+      delayMicroseconds(maxVelDelay2);
+
+      currentPosition++;
+
+      checkSerialMonitor();
+
+      if(newInput == true)
+        {
+        break;  
+        }
+
+      if(interruptFlagO > 0)
+        {
+        break;
+        }
+      }
+    
+    
+    digitalWrite(dirPin, LOW);
+    delay (1000);
+
+    if ((newInput == false) && (interruptFlagO ==0))
+      {
+        for (int i = 0; i <= stepsBack; i++)
+          {
+          digitalWrite(pulPin, HIGH);
+          delayMicroseconds(maxVelDelay2); 
+          digitalWrite(pulPin, LOW);
+          delayMicroseconds(maxVelDelay2);
+
+          currentPosition = currentPosition - 1;
+          }
+      }
+
+    interruptFlagO = 0;
+
+    Serial.println("Door opened!");      
+   }
+
+
+
+void stopDoorFunc()
+  {
+  newInput=false;
+  Serial.println("Door stopped!");
+  }
