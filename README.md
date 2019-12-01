@@ -21,7 +21,6 @@ Both Doors &amp; First Door Puzzle
 	* communication structure and flow developed with operator group: 
 	* first test with mosquitto server run on PC and ESP32 client was successful
 	* __next_steps__: implement communication for each ESP32
-- [ ]
 
 ## First Puzzle ##
 ### Stage ###
@@ -67,6 +66,7 @@ Door should open after solving the first puzzle and close after all participants
 * mounting door - tooth belt
 * door material (wooden plates)
 * U-profile duct at floor (wooden)
+* current sensor (ACS712)
 
 ## Plasma Globe Puzzle ##
 ### Stage ###
@@ -88,9 +88,10 @@ When the first door opens, participants enter the labroom. There, all lights are
 * ESP32
 * plasma globes
 * buck converter (24V-->5V)/ power plug
+* current sensor (ACS712)
 
 ## Communication ##
 The MQTT communication that was developed with the operator group can be found here:
-* [Named Link](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
-* [Named Link](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
-* [Named Link](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
+* [Doors](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
+* [First Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
+* [Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
