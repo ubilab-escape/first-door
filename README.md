@@ -87,4 +87,10 @@ When the first door opens, participants enter the labroom. There, all lights are
 ### Material ###
 * ESP32
 * plasma globes
-* buck converter (24V-->5V)/ power plug	
+* buck converter (24V-->5V)/ power plug
+
+## Communication ##
+The MQTT communication that was developed with the operator group can be found here:
+* [Named Link](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
+* [Named Link](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
+* [Named Link](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
