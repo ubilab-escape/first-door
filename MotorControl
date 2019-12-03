@@ -9,6 +9,9 @@
 //    -stop
 
 
+//
+#include <AccelStepper.h>
+
 
 //Define pin connections
 #define enPin 25
@@ -17,21 +20,16 @@
 #define interruptOpenPin 26
 #define interruptClosePin 27
 
-
-
-// Velocity is calculated in steps/sec ---> Velocity/200 is equal to turns per second
-const int calVelocity = 600; //3 turns per second
-const int maxVelocity =1000; //5 turns per second
-
-//Acceleration
-int accelSteps = 600; //acceleration during the first three turns
-const double pi = 3.1415926535;
-
-//Position
-int currentPosition; //location coordinate
-int maxDistance; //Maximum distance in steps
-int stepsBack = 200; //Number of steps backwards after touching the end. This was implemented that the switch is not pressed the whole time
-
+const int acceleration = 200;
+const int maxVelocity = 800;
+const int minVelocity = 300; //unter 300 steps/sec -->microstepping : Dann alle Steps mit Faktor multiplizieren
+const int calVelocity = 300;
+const int minVelSteps = 800; 
+const int breakSteps = 0.5*sq(minVelocity)/acceleration ;
+const int moveOn = 400;
+int curPos;
+int endPosition;
+int maxSteps;
 
 //Input variables and commands
 String openDoor = "open";
@@ -46,7 +44,7 @@ bool newInput = false;
 volatile int interruptFlagO = 0;
 volatile int interruptFlagC = 0;
 
-
+AccelStepper door1(1,pulPin, dirPin);
 
 
 
@@ -65,17 +63,22 @@ void setup() {
   pinMode(pulPin, OUTPUT);
   pinMode(interruptOpenPin, INPUT_PULLUP);
   pinMode(interruptClosePin, INPUT_PULLUP);
-  
-  //Enable Driving Stage
-  digitalWrite(enPin, LOW); 
- 
+   
   //Interrupt for door stop detection
-  attachInterrupt(digitalPinToInterrupt(interruptOpenPin),interruptOpen,CHANGE); //Interrupt at the end of door opening due to switch touching
-  attachInterrupt(digitalPinToInterrupt(interruptClosePin),interruptClose,CHANGE); //Interrupt at the end of door closing due to switch touching
+  attachInterrupt(digitalPinToInterrupt(interruptOpenPin),interruptOpen,FALLING); //Interrupt at the end of door opening due to switch touching
+  attachInterrupt(digitalPinToInterrupt(interruptClosePin),interruptClose,FALLING); //Interrupt at the end of door closing due to switch touching
 
-  //Measure the distance between open and close in steps
+  door1.setMaxSpeed(calVelocity);
+  door1.setAcceleration(acceleration);
+   
+  digitalWrite(enPin, LOW); //Enable Driving Stage
   calibration();
+  digitalWrite(enPin, HIGH); //Disable Driving Stage
   
+  Serial.print("MaxSteps:");
+  Serial.println(maxSteps);
+
+  Serial.println("Setup done");
 }
 
 
@@ -89,38 +92,28 @@ void setup() {
 
 void loop() 
   {
-
-
     checkSerialMonitor(); //check serial monitor for new command
 
     if(newInput == true)
       {
     
-        if(inputCommand = openDoor) //open door 
+        if( inputCommand == openDoor ) //open door 
           {
           openDoorFunc();
           }
           
-        else if(inputCommand = closeDoor) //close door
+        else if( inputCommand == closeDoor ) //close door
           {
           closeDoorFunc();
           }
 
-        else if(inputCommand = stopDoor) //close door
+        else if( inputCommand == stopDoor ) //stop door
           {
-          stopDoorFunc();
-          }
-        
-      }
- 
-    
+          //stopDoorFunc();
+          }      
+      }   
   }
     
-
-
-
-
-
 
 
     
@@ -148,60 +141,29 @@ void interruptClose()
 
 void calibration()
   {
-    // Set spinning direction to open 
-    digitalWrite(dirPin, HIGH);
-
-    double calVelDelay = 1/(calVelocity *2*pow(10,-6));
-    int calVelDelay2 = calVelDelay;
-    
-    //Door moves on to starting point (door completely open)
-    while (interruptFlagO == 0) 
-      {
-      Serial.println("Calibration in progress!");
-      digitalWrite(pulPin, HIGH);
-      delayMicroseconds(calVelDelay2); 
-      digitalWrite(pulPin, LOW);
-      delayMicroseconds(calVelDelay2);    
-      }
-
-
-    // Set spinning direction to close 
-    digitalWrite(dirPin, LOW);
-    delay(1000);
-    //Reset of calibration parameters
-    currentPosition=0;
-
-
-    //Door moves from starting point to end point and measures the number of steps
-    while (interruptFlagC == 0) 
-      {
-      Serial.println("Calibration in progress!");
-      digitalWrite(pulPin, HIGH);
-      delayMicroseconds(calVelDelay2); 
-      digitalWrite(pulPin, LOW);
-      delayMicroseconds(calVelDelay2);
-      currentPosition++;    
-      }
-
-      
-    maxDistance = currentPosition;
-    currentPosition = 0;
-    digitalWrite(dirPin, HIGH);
-    delay (1000);
-
-
-    for (int c = 0; c <= stepsBack; c++)
-      {
-      Serial.println("Calibration in progress!");
-      digitalWrite(pulPin, HIGH);
-      delayMicroseconds(calVelDelay2); 
-      digitalWrite(pulPin, LOW);
-      delayMicroseconds(calVelDelay2);
-      }
-    
+    Serial.println("Calibration in progress");     
+    digitalWrite(enPin, LOW); //Enable Driving Stage
     
     interruptFlagO = 0;
+    while(interruptFlagO == 0)
+    {     
+      door1.setSpeed(calVelocity);
+      door1.runSpeed();  
+    }
+      
+    door1.setCurrentPosition(0);
+    delay(1000);
+    
     interruptFlagC = 0;
+    while(interruptFlagC == 0)
+    {
+      door1.setSpeed(-calVelocity);
+      door1.runSpeed();
+    }
+    maxSteps=abs(door1.currentPosition());
+    door1.setCurrentPosition(0); 
+    digitalWrite(enPin, HIGH); //Disable Driving Stage
+    
     Serial.println("Calibration done!");
     }
 
@@ -215,6 +177,7 @@ void checkSerialMonitor()
     if(Serial.available()>0)  
       {
       inputCommand = Serial.readString(); //save serial communication in variable
+      inputCommand.trim();
       Serial.println("Receive input:");
       Serial.println(inputCommand);
       newInput = true; 
@@ -226,115 +189,129 @@ void checkSerialMonitor()
 
 void closeDoorFunc()
   {
-    newInput = false;
+    newInput = false; //Reset input variable
+    interruptFlagC = 0;
     Serial.println("Door closes!");
+    digitalWrite(enPin, LOW); //Enable Driving Stage
+    door1.setAcceleration(acceleration);
+    door1.setMaxSpeed(0);  
+    curPos = door1.currentPosition(); 
+    Serial.println(curPos);       
 
-    // Set spinning direction  
-    digitalWrite(dirPin, LOW);
-
-    //Calculation of the delays for steppermotor
-    double maxVelDelay = 1/(maxVelocity *2*pow(10,-6));
-    int maxVelDelay2 = maxVelDelay;
-
-    //Door movement  
-    for(int i = 0; i < currentPosition; i++) 
-      {
-      digitalWrite(pulPin, HIGH);
-      delayMicroseconds(maxVelDelay2); 
-      digitalWrite(pulPin, LOW);
-      delayMicroseconds(maxVelDelay2);
-
-      currentPosition = currentPosition - 1;
-
-      checkSerialMonitor();
-
-      if(newInput == true)
-        {
-        break;  
+    if(curPos > minVelSteps)
+    {
+      endPosition = minVelSteps-breakSteps;
+      door1.moveTo(endPosition);
+      door1.setMaxSpeed(maxVelocity);
+      
+      while((curPos>minVelSteps) && (newInput == false))
+        { 
+        door1.run();
+        curPos=door1.currentPosition();
+        checkSerialMonitor();         
         }
 
-      if(interruptFlagC > 0)
-        {
-        break;
-        }
-      }
-    
-    
-    digitalWrite(dirPin, HIGH);
-    delay (1000);
-
-    if ((newInput == false) && (interruptFlagC ==0))
+      endPosition = -moveOn;
+      door1.moveTo(endPosition);
+      door1.setMaxSpeed(minVelocity);
+      
+      while((curPos>(-moveOn)) && (newInput == false))
       {
-        for (int i = 0; i <= stepsBack; i++)
+        door1.run();
+        curPos=door1.currentPosition();
+        checkSerialMonitor();
+        if(interruptFlagO>0)
           {
-          digitalWrite(pulPin, HIGH);
-          delayMicroseconds(maxVelDelay2); 
-          digitalWrite(pulPin, LOW);
-          delayMicroseconds(maxVelDelay2);
-
-          currentPosition++;
+          break;
           }
       }
-    interruptFlagC = 0;
-
-    Serial.println("Door closed!");
+    }
+      
+      
+    else if(curPos <= minVelSteps)
+    {
+      endPosition = -moveOn;
+      door1.moveTo(endPosition);
+      door1.setMaxSpeed(minVelocity);
+      
+      while((curPos>(-moveOn)) && (newInput == false))
+      { 
+        door1.run();
+        curPos=door1.currentPosition();
+        checkSerialMonitor();
+        if(interruptFlagO>0)
+          {
+          break;
+          }
+      }
+    }
+    
+    digitalWrite(enPin, HIGH); //Disable Driving Stage
+    Serial.println("Door closed!");    
   }
 
 
 void openDoorFunc()
   {
-    newInput = false;
+    newInput = false; //Reset input variable
+    interruptFlagO = 0;
     Serial.println("Door opens!");
+    digitalWrite(enPin, LOW); //Enable Driving Stage
+    door1.setSpeed(0);
+    door1.setAcceleration(acceleration);
+    door1.setMaxSpeed(0);  
+    curPos = door1.currentPosition();     
+    Serial.println(curPos);   
 
-    // Set spinning direction  
-    digitalWrite(dirPin, HIGH);
-
-    //Calculation of the delays for steppermotor
-    double maxVelDelay = 1/(maxVelocity *2*pow(10,-6));
-    int maxVelDelay2 = maxVelDelay;
-
-    //Door movement  
-    for(int i = currentPosition; i<= maxDistance; i++) 
-      {
-      digitalWrite(pulPin, HIGH);
-      delayMicroseconds(maxVelDelay2); 
-      digitalWrite(pulPin, LOW);
-      delayMicroseconds(maxVelDelay2);
-
-      currentPosition++;
-
-      checkSerialMonitor();
-
-      if(newInput == true)
-        {
-        break;  
+    if(curPos<(maxSteps-minVelSteps))
+    {
+      endPosition = (maxSteps-minVelSteps+breakSteps);
+      door1.moveTo(endPosition);
+      door1.setMaxSpeed(maxVelocity);
+      
+      while((curPos<(maxSteps-minVelSteps)) && (newInput == false))
+        { 
+        door1.run();
+        curPos=door1.currentPosition();
+        checkSerialMonitor();         
         }
 
-      if(interruptFlagO > 0)
-        {
-        break;
-        }
-      }
-    
-    
-    digitalWrite(dirPin, LOW);
-    delay (1000);
+      endPosition = (maxSteps+moveOn);
+      door1.moveTo(endPosition);
+      door1.setMaxSpeed(minVelocity);
 
-    if ((newInput == false) && (interruptFlagO ==0))
-      {
-        for (int i = 0; i <= stepsBack; i++)
+      while((curPos<(maxSteps+moveOn)) && (newInput == false))
+        {
+        door1.run();
+        curPos=door1.currentPosition();
+        checkSerialMonitor();
+        if(interruptFlagO>0)
           {
-          digitalWrite(pulPin, HIGH);
-          delayMicroseconds(maxVelDelay2); 
-          digitalWrite(pulPin, LOW);
-          delayMicroseconds(maxVelDelay2);
-
-          currentPosition = currentPosition - 1;
+          break;
           }
       }
-
-    interruptFlagO = 0;
-
+    }
+      
+      
+    else if(curPos>=(maxSteps-minVelSteps))
+    {
+      endPosition = (maxSteps+moveOn);
+      door1.moveTo(endPosition);
+      door1.setMaxSpeed(minVelocity);
+      
+      while((curPos<(maxSteps+moveOn)) && (newInput == false))
+      { 
+        door1.run();
+        curPos=door1.currentPosition();
+        checkSerialMonitor();
+        if(interruptFlagO>0)
+          {
+          break;
+          }
+      }
+    }
+    
+    digitalWrite(enPin, HIGH); //Disable Driving Stage
     Serial.println("Door opened!");      
    }
 
@@ -345,3 +322,8 @@ void stopDoorFunc()
   newInput=false;
   Serial.println("Door stopped!");
   }
+
+
+
+
+ 
