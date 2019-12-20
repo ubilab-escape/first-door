@@ -6,8 +6,7 @@ Both Doors &amp; First Door Puzzle
 	* ESP32 software is in progress: Tests with keypad, lcd
 	* first Hardware test completed
 	* __next steps__: mqtt communication, room integration
-- [ ] door mechanics
-	* __next steps__: setup of the door mechanism in the room
+- [x] door mechanics
 - [ ] first door software (motor control, end switch, current sensor, lock)
 	* motor control via ESP32 + end stop (switch) interrupt is in progress
 	* software for current sensor ACS712 in progress
@@ -18,7 +17,7 @@ Both Doors &amp; First Door Puzzle
 	* software for current sensor ACS712 in progress
 	* __next_steps__: electrical setup and current measurements
 - [ ] Wifi/MQTT/Json communication
-	* communication structure and flow developed with operator group: 
+	* communication structure and flow developed with operator group 
 	* first test with mosquitto server run on PC and ESP32 client was successful
 	* __next_steps__: implement communication for each ESP32
 
