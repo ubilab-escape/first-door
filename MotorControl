@@ -24,8 +24,8 @@
 #define interruptOpenPin 12
 #define interruptClosePin 23
 
-const char* ssid = "ubilab_wifi";
-const char* password = "ohg4xah3oufohreiPe7e";
+const char* ssid = "";
+const char* password = "";
 
 const int acceleration = 1300;
 const int accelerationBreak = 2000;
