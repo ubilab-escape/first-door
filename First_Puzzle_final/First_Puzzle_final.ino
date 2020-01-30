@@ -135,8 +135,8 @@ void loop(){
         //if password correct
         if (strncmp(myInput, myPasswort,4) == 0) {
           // send puzzle solved message
-          mqtt_publish("4/Puzzle", "STATUS", "solved");
-          mqtt_publish("4/Door/Entrance","trigger","open");
+          mqtt_publish("4/puzzle", "status", "solved");
+          //mqtt_publish("4/door/entrance","trigger","on");
           //turn off lcd
           delay(200);
           lcd.clear();

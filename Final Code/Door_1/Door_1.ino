@@ -65,9 +65,11 @@ const int breakStepsInput = 0.5 * sq(maxVelocity) / accelerationBreak;
 int curPos;
 int endPosition;
 int maxSteps;
-int actPos;
 
-bool newInput = false;
+bool brakeOpen = false;
+bool brakeClose = false;
+
+
 
 //Interrupt variables
 volatile int interruptFlagO = 0;
@@ -89,26 +91,33 @@ void setup() {
   pinMode(pulPin, OUTPUT);
   pinMode(interruptOpenPin, INPUT_PULLUP);
   pinMode(interruptClosePin, INPUT_PULLUP);
-  
-  #ifdef DOOR1
+
+#ifdef DOOR1
   pinMode(14, OUTPUT);
   digitalWrite(14, HIGH); //Supply for LED on endstop board
   pinMode(27, OUTPUT);
   digitalWrite(27, LOW); //GND for endstop board
-  #endif
+#endif
 
-  #ifdef DOOR2
-  pinMode(21,OUTPUT);
-  digitalWrite(21,HIGH); //Supply for LED on endstop board
-  pinMode(19,OUTPUT);
-  digitalWrite(19,LOW); //GND for endstop board
-  #endif
+#ifdef DOOR2
+  pinMode(21, OUTPUT);
+  digitalWrite(21, HIGH); //Supply for LED on endstop board
+  pinMode(19, OUTPUT);
+  digitalWrite(19, LOW); //GND for endstop board
+#endif
 
   //Interrupt for door stop detection
   attachInterrupt(digitalPinToInterrupt(interruptOpenPin), interruptOpen, FALLING); //Interrupt at the end of door opening due to switch touching
   attachInterrupt(digitalPinToInterrupt(interruptClosePin), interruptClose, RISING); //Interrupt at the end of door closing due to switch touching
 
-  OTA();
+  //save WiFi credentials in eeprom (set the credentials in the variables ssid and password declared above)
+  //***only to be done once***
+  //saveCredentials();
+  //load WiFi credentials from eeprom
+  //loadCredentials();
+
+  setup_wifi();
+  setupOTA();
   setup_mqtt();
 
   //after wifi stuff calibrate the door!
@@ -128,23 +137,14 @@ void loop() {
   // Arduino OTA
   ArduinoOTA.handle();
 
-
-  //  // Re-advertise service
-  //  if ((long)(millis() - mdnsUpdate) >= 0) {
-  //    MDNS.addService("elec", "tcp", 54322);
-  //    mdnsUpdate += 100000;
-  //  }
-
   //(re-) connect to mqtt server and check for incoming messages
   mqtt_loop();
 
   if (openDoor == true) {
-
     openDoorFunc();
     openDoor = false;
   }
   else if (closeDoor == true) {
-
     closeDoorFunc();
     closeDoor = false;
   }
@@ -197,7 +197,7 @@ void calibration()
   door1.setAcceleration(acceleration);
 
   //firstly, drive to right (open) ONLY if the endstop is not activated (door open alread)
-  if(digitalRead(interruptOpenPin) != LOW)
+  if (digitalRead(interruptOpenPin) != LOW)
   {
     while (true)
     {
@@ -233,297 +233,225 @@ void calibration()
   Serial.println("Calibration done!");
 }
 
-//*******************************************************************************************************
-//****************************************** OTA ****************************************************
-//********************************************************************************************************
-
-void OTA(){
-  WiFi.disconnect(true);
-  delay(1000);
-  WiFi.mode(WIFI_STA);
-  delay(1000);
-  WiFi.begin(ssid, password);
-  delay(1000);
-  WiFi.begin(ssid, password);
-  long timer = millis();
-  while (millis() - timer < 10000) {
-    if (WiFi.status() == WL_CONNECTED) break;
-    delay(5000);
-    #ifdef DEBUG
-    Serial.print(".");
-    #endif 
-    WiFi.begin(ssid, password);
-  }
-  if (WiFi.status() != WL_CONNECTED) {
-    #ifdef DEBUG
-    Serial.println("Connection Failed! Rebooting...");
-    #endif 
-    delay(100);
-    ESP.restart();
-  }
-
-
-  // Hostname defaults to esp3232-[MAC]
-  #ifdef DOOR1
-  ArduinoOTA.setHostname("Door1");
-  #endif
-  #ifdef  DOOR2
-  ArduinoOTA.setHostname("Door2");
-  #endif
-
-  ArduinoOTA.setPassword("group4");
-
-  ArduinoOTA.onStart([]()
-  {
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH)
-      type = "sketch";
-    else // U_SPIFFS
-      type = "filesystem";
-
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-    #ifdef DEBUG
-    Serial.println("Start updating " + type);    
-    #endif 
-  })
-  .onEnd([]()
-  {
-    #ifdef DEBUG
-    Serial.println("\nEnd");    
-    #endif 
-  })
-  .onProgress([](unsigned int progress, unsigned int total) {
-    #ifdef DEBUG
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));    
-    #endif 
-  })
-  .onError([](ota_error_t error)
-  {
-    #ifdef DEBUG
-    Serial.printf("Error[%u]: ", error);    
-    #endif 
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
-
-  ArduinoOTA.begin();
-    #ifdef DEBUG
-    Serial.println("Ready");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());    
-    #endif 
-}
 
 //*******************************************************************************************************
 //******************************************Close Door****************************************************
 //********************************************************************************************************
-void closeDoorFunc()
-{
+void closeDoorFunc() {
   //Only close door if endstop not activated
-  if(!digitalRead(interruptClosePin)){
+  if (!digitalRead(interruptClosePin)) {
     #ifdef DEBUG
     Serial.println("Door closes!");
-    #endif  
-  
-    digitalWrite(enPin, LOW); //Enable Driving Stage  
+    #endif
+
+    digitalWrite(enPin, LOW); //Enable Driving Stage
     interruptFlagC = 0; //Reset InterruptCounter
     door1.setMaxSpeed(0); //Set all velocity variable in the library to zero (BUG)
 
     //Check current position if door is in main speed section
-    if(curPos > minVelSteps)
-     {
-     //Moving Parameters
-     door1.setMaxSpeed(maxVelocity);
-     door1.setAcceleration(acceleration);
-     door1.moveTo(minVelSteps-breakSteps);
-  
-      //Close Door up to position where continuing with constant speed
-      while(curPos > minVelSteps && closeDoor == true)
-        {
-        door1.run();
-        curPos = door1.currentPosition();
-        mqtt_loop();
-
-        //Enstop touched. Safety, if calibration parameters are incorrect
-        if(interruptFlagC > 0)
-          {
-            //delay(1000); //to prevent door from moving freely with rest impuls
-            //digitalWrite(enPin, HIGH); //Disable Driving Stage
-            return;
-          }
-        }
-  
+    if (curPos > minVelSteps) {
+      MoveDoor();
       //if during main speed phase closing, mqtt message 'open door' was received, start breaking in closing direction
-      if(closeDoor == false)
-        {
-          door1.setAcceleration(accelerationBreak);
-          endPosition = curPos - breakStepsInput;
-          //avoid additional acceleration if calculated endposition is negative
-          if(endPosition < 0){
-            endPosition = 0;
-          }
-          door1.moveTo(endPosition);
-          
-    
-          while(curPos > endPosition)
-            {
-              door1.run();
-              curPos = door1.currentPosition();
+      if (closeDoor == false) {
+        Brake("brakeClose");
+        return; //after braking leave openDoorFunc
+      }
+    } //Door reached minVelSteps or stopped due to new input in mqtt_loop
 
-              //Enstop touched. Safety, if calibration parameters are incorrect
-              if(interruptFlagC > 0)
-                {
-                  //delay(1000); //to prevent door from moving freely with rest impuls
-                  //digitalWrite(enPin, HIGH); //Disable Driving Stage
-                  return;
-                }
-            }    
-        return; //after breaking leave closeDoorFunc   
-        }
-     
-      } //Door reached minVelSteps or stopped due to new input in mqtt_loop
 
     //check current position if door is in slow speed section
-    if(curPos <= minVelSteps)
-     {
-     //Moving Parameters
-     door1.setMaxSpeed(minVelocity);
-     door1.setAcceleration(acceleration);
-     door1.moveTo(-moveOn);
-
-      //
-      while((curPos > (-moveOn)) && closeDoor == true)
-        {
-        door1.run();
-        curPos=door1.currentPosition();
-        mqtt_loop();
-      
-        if(interruptFlagC>0)
-         {
-         delay(1000);
-         digitalWrite(enPin, HIGH); //Disable Driving Stage
-         //send closed door message to disable plasma globe puzzle
-         mqtt_publish("4/Globes", "message", "door_1_closed"); 
-         return;
-         }
-        }
-      
-      }
-  
-      //this section of the code is only reached if door moves below zero (happens if endstop is damaged)
-      delay(1000);
-      digitalWrite(enPin, HIGH); //Disable Driving Stage
-  
-      //send closed door message to disable plasma globe puzzle
-      mqtt_publish("4/Door/Entrance", "message", "door_1_closed");
-      
-      #ifdef DEBUG
-      Serial.println("Door closed!");
-      #endif 
-   
+    if (curPos <= minVelSteps) {
+      MoveDoorSlow();
     }
+    #ifdef DEBUG
+    Serial.println("Door closed!");
+    #endif
+  }
 }
 //*******************************************************************************************************
 //******************************************Open Door****************************************************
 //********************************************************************************************************
-void openDoorFunc()
-{
+void openDoorFunc() {
+
   //Only open door if endstop not activated (different level than close endstop!)
-  if(digitalRead(interruptOpenPin)){
-    
+  if (digitalRead(interruptOpenPin)) {
     #ifdef DEBUG
     Serial.println("Door opens!");
     #endif
-    digitalWrite(enPin, LOW); //Enable Driving Stage  
+    digitalWrite(enPin, LOW); //Enable Driving Stage
     interruptFlagO = 0; //Reset InterruptCounter
     door1.setMaxSpeed(0); //Set all velocity variable in the library to zero (BUG)
 
     //Check current position if door is in main speed section
-    if (curPos < (maxSteps - minVelSteps))
-    {
-      //Moving Parameters
-      door1.setMaxSpeed(maxVelocity);
-      door1.setAcceleration(acceleration);
-      door1.moveTo(maxSteps - minVelSteps + breakSteps);
-
-      //Open Door up to position where continuing with constant speed
-      while ((curPos < (maxSteps - minVelSteps)) && openDoor == true)
-      {
-        door1.run();
-        curPos = door1.currentPosition();
-        mqtt_loop();
-  
-        //Enstop touched. Safety, if calibration parameters are incorrect
-        if(interruptFlagO > 0)
-          {
-            delay(1000); //to prevent door from moving freely with rest impuls
-            digitalWrite(enPin, HIGH); //Disable Driving Stage
-            return;
-          }
+    if (curPos < (maxSteps - minVelSteps)) {
+      MoveDoor();
+      //if during main speed section closing, mqtt message 'close door' was received, start breaking in opening direction
+      if (openDoor == false) {
+        Brake("brakeOpen");
+        return; //after braking leave openDoorFunc
       }
-
-      //if during main speed phase closing, mqtt message 'close door' was received, start breaking in opening direction
-      if (openDoor == false) //Bremsvorgang - BEGINN
-      {
-        door1.setAcceleration(accelerationBreak);
-        endPosition = curPos + breakStepsInput;
-        //avoid additional acceleration if calculated endposition is greater the max value
-        if(endPosition > maxSteps){
-            endPosition = maxSteps;
-        }
-        door1.moveTo(endPosition);
-  
-        while (curPos < endPosition)
-        {
-          door1.run();
-          curPos = door1.currentPosition();
-          
-          //Enstop touched. Safety, if calibration parameters are incorrect
-          if(interruptFlagO > 0)
-            {
-              delay(1000); //to prevent door from moving freely with rest impuls
-              digitalWrite(enPin, HIGH); //Disable Driving Stage
-              return;
-            }
-        }    
-        return; //after breaking leave closeDoorFunc 
-
-      }//Bremsvorgang ENDE
     }//Door reached minVelSteps or stopped due to new input in mqtt_loop
 
     //check current position if door is in slow speed section
-    if (curPos >= (maxSteps - minVelSteps))
-    {
-      //Moving Parameters
-      door1.setMaxSpeed(minVelocity);
-      door1.setAcceleration(acceleration);
-      door1.moveTo(maxSteps + moveOn);
-  
-      while ((curPos < (maxSteps + moveOn)) && (openDoor == true))
-      {
-        door1.run();
-        curPos = door1.currentPosition();
-        mqtt_loop();
-        
-        if(interruptFlagO>0)
-         {
-           delay(1000);
-           digitalWrite(enPin, HIGH); //Disable Driving Stage 
-           return;
-         }
-      }
-      
+    if (curPos >= (maxSteps - minVelSteps)) {
+      MoveDoorSlow();
     }
-    
-    //this section of the code is only reached if door moves below max point (happens if endstop is damaged)
-    delay(1000);
-    digitalWrite(enPin, HIGH); //Disable Driving Stage
-      
     #ifdef DEBUG
     Serial.println("Door open!");
-    #endif   
+    #endif
+  }
+}
+
+//*******************************************************************************************************
+//****************************************** Brake ****************************************************
+//********************************************************************************************************
+
+void Brake(String brakeDirection) {
+  //Moving Parameters
+  door1.setMaxSpeed(maxVelocity);
+  door1.setAcceleration(accelerationBreak);
+
+  if (brakeDirection == "brakeOpen") {
+    endPosition = curPos + breakStepsInput;
+    //avoid additional acceleration if calculated endposition is greater then max value
+    if (endPosition > maxSteps) {
+      endPosition = maxSteps;
+    }
+
+    door1.moveTo(endPosition);
+    while (curPos < endPosition) {
+      door1.run();
+      curPos = door1.currentPosition();
+
+      //Enstop touched. Safety, if calibration parameters are incorrect
+      if (interruptFlagO > 0) {
+        delay(1000); //to prevent door from moving freely with rest impuls
+        digitalWrite(enPin, HIGH); //Disable Driving Stage
+        break;
+      }
+    }
+  }
+
+  else if (brakeDirection == "brakeClose") {
+    endPosition = curPos - breakStepsInput;
+    //avoid additional acceleration if calculated endposition is greater then max value
+    if (endPosition < 0) {
+      endPosition = 0;
+    }
+    door1.moveTo(endPosition);
+    while (curPos > endPosition) {
+      door1.run();
+      curPos = door1.currentPosition();
+
+      //Enstop touched. Safety, if calibration parameters are incorrect
+      if (interruptFlagC > 0) {
+        //delay(1000); //to prevent door from moving freely with rest impuls
+        //digitalWrite(enPin, HIGH); //Disable Driving Stage
+        break;
+      }
+    }
+  }
+}
+
+//*******************************************************************************************************
+//****************************************** MoveDoor ****************************************************
+//********************************************************************************************************
+
+void MoveDoor() {
+
+  //Moving Parameters
+  door1.setMaxSpeed(maxVelocity);
+  door1.setAcceleration(acceleration);
+
+  if (openDoor == true) {
+    door1.moveTo(maxSteps - minVelSteps + breakSteps);
+    //Open Door up to position where continuing with constant speed
+    while ((curPos < (maxSteps - minVelSteps)) && openDoor == true) {
+      door1.run();
+      curPos = door1.currentPosition();
+      mqtt_loop();
+
+      //Enstop touched. Safety, if calibration parameters are incorrect
+      if (interruptFlagO > 0) {
+        delay(1000); //to prevent door from moving freely with rest impuls
+        digitalWrite(enPin, HIGH); //Disable Driving Stage
+        return;
+      }
+    }
+  }
+
+  else if (closeDoor == true) {
+    door1.moveTo(minVelSteps - breakSteps);
+    //Close Door up to position where continuing with constant speed
+    while (curPos > minVelSteps && closeDoor == true) {
+      door1.run();
+      curPos = door1.currentPosition();
+      mqtt_loop();
+
+      //Enstop touched. Safety, if calibration parameters are incorrect
+      if (interruptFlagC > 0)
+      {
+      delay(1000);
+      digitalWrite(enPin, HIGH); //Disable Driving Stage
+      #ifdef DEBUG1
+      //send closed door message to disable plasma globe puzzle
+      mqtt_publish("4/door/entrance", "message", "door_1_closed");
+      #endif
+      return;
+      }
+    }
+  }
+}
+
+//*******************************************************************************************************
+//****************************************** MoveDoorSlow ****************************************************
+//********************************************************************************************************
+
+void MoveDoorSlow() {
+  //Moving Parameters
+  door1.setMaxSpeed(minVelocity);
+  door1.setAcceleration(acceleration);
+
+  if (openDoor == true) {
+    door1.moveTo(maxSteps + moveOn);
+    while ((curPos < (maxSteps + moveOn)) && (openDoor == true)) {
+      door1.run();
+      curPos = door1.currentPosition();
+      mqtt_loop();
+
+      if (interruptFlagO > 0) {
+        delay(1000);
+        digitalWrite(enPin, HIGH); //Disable Driving Stage
+        return;
+      }
+    }
+  }
+
+  else if (closeDoor == true) {
+    door1.moveTo(-moveOn);
+    while ((curPos > (-moveOn)) && closeDoor == true) {
+      door1.run();
+      curPos = door1.currentPosition();
+      mqtt_loop();
+
+      if (interruptFlagC > 0) {
+        delay(1000);
+        digitalWrite(enPin, HIGH); //Disable Driving Stage
+        #ifdef DOOR1
+        //send closed door message to disable plasma globe puzzle
+        mqtt_publish("4/globes", "message", "door_1_closed");
+        #endif
+        return;
+      }
+    }
+    if(closeDoor == true){
+      //this section of the code is only reached if door moves below zero (happens if endstop is damaged)
+      delay(1000);
+      digitalWrite(enPin, HIGH); //Disable Driving Stage
+      #ifdef DEBUG1
+      //send closed door message to disable plasma globe puzzle
+      mqtt_publish("4/door/entrance", "message", "door_1_closed");
+      #endif
+    }
   }
 }

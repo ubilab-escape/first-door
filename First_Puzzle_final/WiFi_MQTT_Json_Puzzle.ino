@@ -34,14 +34,14 @@ IPAddress secondaryDNS(8, 8, 4, 4); //optional
 */
 
 const char* ssid = "ubilab_wifi";
-const char* password = "";
+const char* password = "ohg4xah3oufohreiPe7e";
 
 //MQTT variables
 //const char* mqtt_server = "broker.mqtt-dashboard.com";
 //IP address of computer which runs mqtt server (broker) --> mqtt main server ip: 10,0,0,2 / PC:192,168,178,82
 const IPAddress mqttServerIP(10,0,0,2);
 //mqtt device id
-const String clientId = "4/Puzzle";
+const String clientId = "4/puzzle";
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
@@ -165,7 +165,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     puzzle_state = true;
     //respond to activation message
     //{"method":"STATUS","state":"active"}
-    mqtt_publish("4/Puzzle", "STATUS", "active");
+    mqtt_publish("4/puzzle", "STATUS", "active");
 
     //call activate_puzzle function
   }
@@ -207,7 +207,7 @@ void mqtt_loop() {
       /*// Once connected, publish an announcement...
       client.publish("outTopic", "hello world");*/
       // ... and resubscribe
-      client.subscribe("4/Puzzle");
+      client.subscribe("4/puzzle");
     } 
     else {
       Serial.print("failed, rc=");

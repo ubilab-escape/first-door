@@ -1,16 +1,11 @@
 /*
- First Door
+ Doors
 
- 
  This code 
  - establishes Wifi connection
  - establishes MQTT protocoll
  - handles JSON communication to server/ other uC
  - enables Over The Air updates (OTA)
- 
- - JSON messages: {method, state}
-
-
 */
 #include "WiFi_MQTT_Json_Motor.h"
 
@@ -19,32 +14,29 @@
 //EEPROM addressing
 #define MAX_MDNS_LEN 16
 #define MDNS_START_ADDRESS 0
+#define MAX_WIFI_LEN 32
+#define WIFI_SSID_START_ADDRESS 32
+#define WIFI_PWD_START_ADDRESS 64
 
 //mdns - broadcasting name for OTA
 char mdnsName[MAX_MDNS_LEN] = {'\0'};
 
-//Wifi variables
-/*
-// Set your Static IP address
-IPAddress local_IP(10, 0, 4, 0);
-// Set your Gateway IP address
-IPAddress gateway(192, 168, 1, 1);
-
-IPAddress subnet(255, 255, 0, 0);
-IPAddress primaryDNS(8, 8, 8, 8);   //optional
-IPAddress secondaryDNS(8, 8, 4, 4); //optional
-*/
-//const char* ssid = "";
-//const char* password = "";
-//const char* ssid = "";
-//const char* password = "";
+//Wifi credentials 
+char ssid[] = "ubilab_wifi";
+char password[] = "ohg4xah3oufohreiPe7e";
+//char ssid[] = "";
+//char password[] = "";
 
 //MQTT variables
-//const char* mqtt_server = "broker.mqtt-dashboard.com";
 //IP address of computer which runs mqtt server (broker) --> mqtt main server ip: 10,0,0,2
 const IPAddress mqttServerIP(10,0,0,2);
 //mqtt device id
-const String clientId = "Group4_Door_Entrace";
+#ifdef DOOR1
+const String clientId = "Group4_Door_Entrance";
+#endif
+#ifdef DOOR2
+const String clientId = "Group4_Door_Server";
+#endif
 
 String mdns_command = "mdns_change:";
 
@@ -63,39 +55,100 @@ int value = 0;
  * purpose: configure WiFi and connect to network
  */
 void setup_wifi() {
+  
+  WiFi.disconnect(true);
+  delay(1000);
+  WiFi.mode(WIFI_STA);
+  delay(1000);
+  
+  //2x WiFi.begin necessary for connection
+  WiFi.begin(ssid, password);
+  delay(1000);
+  WiFi.begin(ssid, password);
 
-  /*// Configures static IP address
-  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
-    Serial.println("STA Failed to configure");
-  }*/
+  //try connecting 
+  long timer = millis();
+  while (millis() - timer < 10000) {
+    if (WiFi.status() == WL_CONNECTED) break;
+    delay(5000);
+    #ifdef DEBUG
+    Serial.print(".");
+    #endif 
+    WiFi.begin(ssid, password);
+  }
+  
+  //restart ESP if connection failed
+  if (WiFi.status() != WL_CONNECTED) {
+    #ifdef DEBUG
+    Serial.println("Connection Failed! Rebooting...");
+    #endif 
+    delay(100);
+    ESP.restart();
+  }
 
-  delay(10);
-  // We start by connecting to a WiFi network
-  #ifdef DEBUG
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+/*
+ * function setupOTA
+ * param: none
+ * return: none
+ * purpose: establish OTA 
+ */
+void setupOTA() {
+  
+  // Hostname defaults to esp3232-[MAC]
+  #ifdef DOOR1
+  ArduinoOTA.setHostname("Door1");
+  #endif
+  #ifdef  DOOR2
+  ArduinoOTA.setHostname("Door2");
   #endif
 
-  if (WiFi.status() != WL_CONNECTED) {
-    WiFi.begin(ssid, password);
-    mdnsUpdate = millis();
-  }
-  
+  ArduinoOTA.setPassword("group4");
 
-  while (WiFi.status() != WL_CONNECTED) {
+  ArduinoOTA.onStart([]()
+  {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+      type = "sketch";
+    else // U_SPIFFS
+      type = "filesystem";
+
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
     #ifdef DEBUG
-    delay(500);
-    Serial.print(".");
-    #endif
-  }
-  
-  #ifdef DEBUG
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-  #endif DEBUG
+    Serial.println("Start updating " + type);    
+    #endif 
+  })
+  .onEnd([]()
+  {
+    #ifdef DEBUG
+    Serial.println("\nEnd");    
+    #endif 
+  })
+  .onProgress([](unsigned int progress, unsigned int total) {
+    #ifdef DEBUG
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));    
+    #endif 
+  })
+  .onError([](ota_error_t error)
+  {
+    #ifdef DEBUG
+    Serial.printf("Error[%u]: ", error);    
+    #endif 
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+
+  ArduinoOTA.begin();
+    #ifdef DEBUG
+    Serial.println("Ready");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());    
+    #endif 
 }
 
 
@@ -161,7 +214,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
     //respond to activation message
     //{"method":"STATUS","state":"active", "data":"opening"}
-    //mqtt_publish("4/Door/Entrance", "status", "active", "opening");
+    //mqtt_publish("4/door/entrance", "status", "active", "opening");
 
   }
   /*********************** trigger: off ****************************/
@@ -173,11 +226,12 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
     //respond to activation message
     //{"method":"STATUS","state":"active", "data":"closing"}
-    //mqtt_publish("4/Door/Entrance", "status", "active", "closing");
+    //mqtt_publish("4/door/entrance", "status", "active", "closing");
 
   }
   
-  /*********************** change mdns name ****************************/  
+  /*********************** change mdns name ****************************/
+  /*MDNS stuff not used in door code  
   else if (Method == "message" && State == (mdns_command + mdnsName)){
     
     #ifdef DEBUG
@@ -197,9 +251,9 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     //restart the esp to see changed name in OTA
     ESP.restart();  
   }
-
+  */
   /*********************** reset esp ****************************/  
-  else if (Method == "message" && State == "reset"){
+  else if (Method == "message" && State == "restart"){
     ESP.restart();
 
   }
@@ -230,7 +284,12 @@ void mqtt_loop() {
       /*// Once connected, publish an announcement...
       client.publish("outTopic", "hello world");*/
       // ... and resubscribe
-      client.subscribe("4/Door/Entrance");
+      #ifdef DOOR1
+      client.subscribe("4/door/entrance");
+      #endif
+      #ifdef DOOR2
+      client.subscribe("4/door/server");
+      #endif
     } 
     else {
       Serial.print("failed, rc=");
@@ -306,10 +365,12 @@ void mqtt_publish(String topic_name, String Method, String State, String Data){
 }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
+
 /****************************************************
  * Init the MDNs name from eeprom, only the number ist
  * stored in the eeprom, construct using prefix.
  ****************************************************/
+/*
 void initMDNS() {
   // Load the MDNS name from eeprom
   EEPROM.begin(2*MAX_MDNS_LEN);
@@ -347,49 +408,91 @@ void writeMDNS(const char * newName) {
   EEPROM.put(address+chars, '\0');
   EEPROM.commit();
 }
-
+*/
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
-/*
- * function setupOTA
- * param: none
- * return: none
- * purpose: establish OTA 
- */
-void setupOTA() {
+//***save/load the wifi credentials to/ from eeprom
+void loadCredentials() {
+  EEPROM.begin(512);
+  
+  /*
+  EEPROM.get(MAX_MDNS_LEN, ssid);
+  Serial.print("read ssid: ");
+  Serial.println(ssid);
+  EEPROM.get(MAX_MDNS_LEN+sizeof(ssid), password);
+  char ok[2+1];
+  EEPROM.get(MAX_MDNS_LEN+sizeof(ssid)+sizeof(password), ok);
+  EEPROM.end();
+  if (String(ok) != String("OK")) {
+    ssid[0] = 0;
+    password[0] = 0;
+  }
+  Serial.println("Recovered credentials:");
+  //Serial.println(ssid);
+  Serial.println(strlen(password)>0?"********":"<no password>");
+  */
 
-  // No authentication by default
-  ArduinoOTA.setPassword("admin");
+  uint16_t address = WIFI_SSID_START_ADDRESS;
+  uint8_t chars = 0;
+  EEPROM.get(address, chars);
+  address += 1;
+  if (chars < MAX_WIFI_LEN) {
+    for (uint8_t i = 0; i < chars+1; i++) EEPROM.get(address+i, ssid[i]);
+  }
+  //int leng = strlen(ssid);
+  //ssid[leng+1] = '\0';
+  Serial.print("ssid length: ");
+  Serial.println(strlen(ssid));
+  Serial.print("read ssid: ");
+  for (uint8_t i = 0; i <= strlen(ssid); i++){
+  Serial.print(ssid[i]);
+  }
+  Serial.println("");
 
-  ArduinoOTA.onStart([]() {
-    Serial.println("Start updating");
-    // free(buffer);
-  });
+  address = WIFI_PWD_START_ADDRESS;
+  chars = 0;
+  EEPROM.get(address, chars);
+  address += sizeof(chars);
+  if (chars < MAX_WIFI_LEN) {
+    for (uint8_t i = 0; i < chars+1; i++) EEPROM.get(address+i, password[i]);
+  }
+  Serial.print("pwd length: ");
+  Serial.println(strlen(password));
+  Serial.print("read pwd: ");
+  for (uint8_t i = 0; i <= strlen(ssid); i++){
+  Serial.print(password[i]);
+  }
+  Serial.println("");
 
-  ArduinoOTA.onEnd([]() {
-    Serial.println("\nEnd");
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  });
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) {
-      Serial.println("Auth Failed");
-    } else if (error == OTA_BEGIN_ERROR) {
-      Serial.println("Begin Failed");
-    } else if (error == OTA_CONNECT_ERROR) {
-      Serial.println("Connect Failed");
-    } else if (error == OTA_RECEIVE_ERROR) {
-      Serial.println("Receive Failed");
-    } else if (error == OTA_END_ERROR) {
-      Serial.println("End Failed");
-    }
-    // No matter what happended, simply restart
-    //WiFi.forceSleepBegin();
-    //wdt_reset();
-    ESP.restart();
-    //while(1) wdt_reset();
-  });
+  
+}
 
-  ArduinoOTA.begin();
+//-----------------------------------------------------------------------
+void saveCredentials() {
+  
+  uint16_t address = WIFI_SSID_START_ADDRESS;
+  uint8_t chars = strlen(ssid);
+  
+  EEPROM.begin(512);
+  EEPROM.put(address, chars);
+  address += 1;
+  for (uint8_t i = 0; i < chars; i++) EEPROM.put(address+i, ssid[i]);
+  EEPROM.put(address+chars, '\0');
+
+  address = WIFI_PWD_START_ADDRESS;
+  chars = strlen(password);
+  EEPROM.put(address, chars);
+  address += 1;
+  for (uint8_t i = 0; i < chars; i++) EEPROM.put(address+i, password[i]);
+  EEPROM.put(address+chars, '\0');
+  
+  /*
+  EEPROM.put(MAX_MDNS_LEN, ssid);
+  Serial.print("write in eeprom (ssid): ");
+  Serial.println(ssid);
+  EEPROM.put(MAX_MDNS_LEN+sizeof(ssid), password);
+  char ok[2+1] = "OK";
+  EEPROM.put(MAX_MDNS_LEN+sizeof(ssid)+sizeof(password), ok);
+  */
+  EEPROM.commit();
+  EEPROM.end();
 }
