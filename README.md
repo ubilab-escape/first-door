@@ -5,11 +5,11 @@ Our group works on the automated doors in the escape room as well on the puzzle 
 After the mission briefing the participants will be let into the anterior room.
 In the story this will be the room of the security even though the security will be absent for the whole game.
 
-The participants have to solve a first puzzle to open the first door and to be able to move to the second, adjencted room which will be the computer lab room.
+The participants have to solve a first puzzle to open the first door and to be able to move to the second, adjencted room which will be the computer lab room. After all players are situated in the second room, the first door should close.
 
 There the players again have to solve various riddles and puzzle to get into the server room. The door between lab and serverroom will be implemented by us.
 
-## Project Timeline##
+## Project Timeline ##
 | Description of work task | Target date | Actual date|
 |:--------------|:-------------|:--------------|
 | Concept finding| 10. Nov 2019 |10. Nov 2019 |
@@ -39,23 +39,28 @@ The obtained code has to be inserted into a keypad with an LCD display.
 	* 4x4 matrix keypad
 	* ESP32
 ### Software ###
-The used software is found under 
+The used software is found under *first-door/Final Code/First_Puzzle_final/*. 
+The needed MQTT commands are:
+* "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"on\"}" for activating the puzzle
+* "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"off\"}" for deactivating the puzzle
+
 
 ## First Door ##
 ### Stage ###
-Door between anteroom and labroom
-Door should open after solving the first puzzle and close after all participants entered the labroom. Finally, it should open again, after prototype was placed back, so that the participants can escape.
+This is the door between anteroom and labroom. This door should open after solving the first puzzle and close after all participants entered the labroom. After the participants were able to solve all other riddles the door should open again to let the players escape.
 
-### Idea ###
+### Concept and Idea ###
 * sliding door with toothbelt mechanism
 * opened/closed automatically by step-motor
-* electrical door lock
 * electromechanical switch detects closed and opened position
+
+Not implemented possible improvements:
+* electrical door lock
 * obstacle detection in closing area: 
 	* variant 1: tracking of current draw (expected to increase significantly if an obstacle is present)
 	* variant 2: ligth barrier (ultra sound) / power measurement of motor
 
-### Material ###
+### Hardware ###
 * ESP32
 * stepper motor + appropriate driver
 * tooth belt
@@ -67,13 +72,16 @@ Door should open after solving the first puzzle and close after all participants
 * mounting door - tooth belt
 * door material (wooden plates)
 * U-profile duct at floor (wooden)
-* current sensor (ACS712)
 
-## Plasma Globe Puzzle ##
+### Software ##
+The corresponding software can be found under: *first-door/Final Code/Door_1/*
+
+
+## Dead man switches - Plasma globes ##
 ### Stage ###
 When the first door opens, participants enter the labroom. There, all lights are off and the plasma globes are activated. The participants must touch all plasma balls simultaneously so that the first door can close and the game continues.
 
-### Idea ###
+### Concept ###
 * assumption: plasma globes draw significantly more current when touched so they can be used as switch(___to be tested!___)
 * several plasma globes spread across the room at the walls (not possible to touch more than one globe simultaneously)
 * Each plasma globe is a standalone unit with own ESP32
@@ -85,7 +93,7 @@ When the first door opens, participants enter the labroom. There, all lights are
 * as soon as door is closed, it publishes a message to deactivate all globes (puzzle solved)
 * _alternative_: use push buttons
 
-### Material ###
+### Hardware ###
 * ESP32
 * plasma globes
 * buck converter (24V-->5V)/ power plug
