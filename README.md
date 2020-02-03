@@ -1,48 +1,45 @@
 # Group 4:  First door #
 Our group works on the automated doors in the escape room as well on the puzzle for the first door.
 
-## Description
+## Part in the Escape Room
+After the mission briefing the participants will be let into the anterior room.
+In the story this will be the room of the security even though the security will be absent for the whole game.
+
+The participants have to solve a first puzzle to open the first door and to be able to move to the second, adjencted room which will be the computer lab room.
+
+There the players again have to solve various riddles and puzzle to get into the server room. The door between lab and serverroom will be implemented by us.
+
+## Project Timeline##
+| Description of work task | Target date | Actual date|
+|:--------------|:-------------|:--------------|
+| Concept finding| 10. Nov 2019 |10. Nov 2019 |
+| First part list| 12. Nov 2019 | 12. Nov 2019|
+| Implementation Hardware door| 01. Dec 2019| 01. Dec 2019|
+| Riddle Implementation| 31. Dec 2019| 31. Dec 2019| 
+| Dead man switch| 10 Jan 2020 | 10. Jan 2020|
+| Testing and Bug fixing| 01. Feb 2020 |  01. Feb 2020 |
+| Presentation| 17. Feb 2020 | 17. Feb 2020 |
 
 
-## Project Parts and Description ##
-The whole project will be divided into the parts puzzle, door and dead man switch
-### Puzzle ####
-
-	* ESP32 software is in progress: Tests with keypad, lcd
-	* first Hardware test completed
-	* __next steps__: mqtt communication, room integration
-- [x] door mechanics
-- [ ] first door software (motor control, end switch, current sensor, lock)
-	* motor control via ESP32 + end stop (switch) interrupt is in progress
-	* software for current sensor ACS712 in progress
-	* __next_steps__: determine velocity and acceleration setting (after mechanical implementation in escape room), current measurements, mqtt communication 
-- [ ] second door software
-	* see first door software
-- [ ] plasma globe puzzle
-	* software for current sensor ACS712 in progress
-	* __next_steps__: electrical setup and current measurements
-- [ ] Wifi/MQTT/Json communication
-	* communication structure and flow developed with operator group 
-	* first test with mosquitto server run on PC and ESP32 client was successful
-	* __next_steps__: implement communication for each ESP32
 
 ## First Puzzle ##
 ### Stage ###
 After the mission briefing, the participants are in the anteroom and need to get access to the labroom.
 
-### Idea ###
-* keypad with lcd display
-* pin is encoded as morse code 
-	* variant 1: Acoustic signal from MP3 player that the security guy forgot in the anteroom (potentially mixed into a song)
-	* variant 2: Acoustic signal from implemented sound system (potentially mixed into a song)
-	* variant 3: Optical signal (LEDs)
-* optional: place additional hints/ puzzles in anteroom with alternative pins that could be tested???
+### Concept and Idea ###
+Story: The absent security man likes to listen to music on his MP3-Player while at work. This MP3 contains several songs as well as an **audio morse code**. Using the help of a hidden morse alphabet in the room the players will be able to solve the puzzle and obtain a code.
+![Morse alphabet](https://www.cnc14.de/content/5-projekte/2-cnc14-projekt-die-morse-verbindung/1-pic.jpg "test")
 
-### Material ###
-* keypad
-* lcd display
-* mounting
-* MP3 player
+The obtained code has to be inserted into a keypad with an LCD display.
+
+### Hardware ###
+* MP3 Player
+* 3D printed Input interface consisting of 
+	* LCD display
+	* 4x4 matrix keypad
+	* ESP32
+### Software ###
+The used software is found under 
 
 ## First Door ##
 ### Stage ###
