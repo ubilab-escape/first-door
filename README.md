@@ -1,8 +1,13 @@
-# first-door #
-Both Doors &amp; First Door Puzzle
+# Group 4:  First door #
+Our group works on the automated doors in the escape room as well on the puzzle for the first door.
 
-## Project Status ##
-- [ ] first Puzzle
+## Description
+
+
+## Project Parts and Description ##
+The whole project will be divided into the parts puzzle, door and dead man switch
+### Puzzle ####
+
 	* ESP32 software is in progress: Tests with keypad, lcd
 	* first Hardware test completed
 	* __next steps__: mqtt communication, room integration
