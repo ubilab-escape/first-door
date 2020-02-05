@@ -1,8 +1,11 @@
 # Group 4:  First door #
 Our group works on the automated doors in the escape room as well on the puzzle for the first door.
 
+## Content
+*[Part in the Escape Room](#Part in the Escape Room "Goto Part in the Escape Room")
+
 ## Part in the Escape Room
-After the mission briefing the participants will be let into the anterior room.
+After the mission briefing the participants will enter the anterior room.
 In the story this will be the room of the security even though the security will be absent for the whole game.
 
 The participants have to solve a first puzzle to open the first door and to be able to move to the second, adjencted room which will be the computer lab room. After all players are situated in the second room, the first door should close.
@@ -39,7 +42,9 @@ The obtained code has to be inserted into a keypad with an LCD display.
 	* 4x4 matrix keypad
 	* ESP32
 ### Software ###
-The used software is found under *first-door/Final Code/First_Puzzle_final/*. 
+The used software is found under *first-door/Final Code/First_Puzzle_final/*.
+//Ablaufdiagramm muss hier rein
+### MQTT Communication ###
 The needed MQTT commands are:
 * "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"on\"}" for activating the puzzle
 * "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"off\"}" for deactivating the puzzle
