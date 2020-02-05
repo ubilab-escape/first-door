@@ -3,11 +3,11 @@ Our group works on the automated doors in the escape room as well on the puzzle 
 
 ## Content
 * [Part in the Escape Room](#1)
-* [Project Timeline] (#2)
-* [General Program Flow] (#3)
-* [First Puzzle] (#4)
-* [Doors] (#5)
-* [Plasma Globes] (#6)
+* [Project Timeline](#2)
+* [General Program Flow](#3)
+* [First Puzzle](#4)
+* [Doors](#5)
+* [Plasma Globes](#6)
 
 ## Part in the Escape Room <a name="1"></a>
 After the mission briefing the participants will enter the anterior room.
