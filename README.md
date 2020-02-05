@@ -2,7 +2,7 @@
 Our group works on the automated doors in the escape room as well on the puzzle for the first door.
 
 ## Content
-*[Part in the Escape Room](#Part in the Escape Room "Goto Part in the Escape Room")
+[Part in the Escape Room](#Part in the Escape Room "Goto Part in the Escape Room")
 
 ## Part in the Escape Room
 After the mission briefing the participants will enter the anterior room.
