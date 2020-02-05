@@ -1,6 +1,5 @@
 /*
  First Puzzle
-
  
  This code 
  - establishes Wifi connection
@@ -9,8 +8,6 @@
  - enables Over The Air updates (OTA)
  
  - JSON messages: {method, state}
-
-
 */
 #include "WiFi_MQTT_Json_Puzzle.h"
 
@@ -27,13 +24,12 @@ char mdnsName[MAX_MDNS_LEN] = {'\0'};
 IPAddress local_IP(10, 0, 4, 0);
 // Set your Gateway IP address
 IPAddress gateway(192, 168, 1, 1);
-
 IPAddress subnet(255, 255, 0, 0);
 IPAddress primaryDNS(8, 8, 8, 8);   //optional
 IPAddress secondaryDNS(8, 8, 4, 4); //optional
 */
 
-const char* ssid = "";
+const char* ssid = "ubilab_wifi";
 const char* password = "";
 
 //MQTT variables
@@ -45,10 +41,6 @@ const String clientId = "4/puzzle";
 
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
-long lastMsg = 0;
-char msg[50];
-int value = 0;
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -59,12 +51,6 @@ int value = 0;
  */
 void setup_wifi() {
 
-  /*// Configures static IP address
-  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
-    Serial.println("STA Failed to configure");
-  }*/
-
-  delay(10);
   // We start by connecting to a WiFi network
   #ifdef DEBUG
   Serial.println();
@@ -164,10 +150,17 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     //set puzzle state variable
     puzzle_state = true;
     //respond to activation message
-    //{"method":"STATUS","state":"active"}
-    mqtt_publish("4/puzzle", "STATUS", "active");
+    //{"method":"status","state":"active"}
+    mqtt_publish("4/puzzle", "status", "active");
+  }
+  /*********************** trigger: off ****************************/
+  else if(Method == "trigger" && State == "off"){
 
-    //call activate_puzzle function
+    //set puzzle state variable
+    puzzle_state = false;
+    //respond to off message
+    //{"method":"status","state":"inactive"}
+    mqtt_publish("4/puzzle", "status", "inactive");
   }
   
   /*********************** change mdns name ****************************/
@@ -179,6 +172,11 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     //adapt mdns name in eeprom (flash) to the string in Data variable
     //change gets visible only after restart of esp32 (when mdns name is initialized)
     writeMDNS(Data.c_str());    
+  }
+
+  /*********************** restart esp ****************************/
+  else if (Method == "message" && State == "restart"){
+    ESP.restart();
   }
 
 }
@@ -219,16 +217,6 @@ void mqtt_loop() {
   }
   
   client.loop();
-  /*
-  long now = millis();
-  if (now - lastMsg > 2000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 50, "hello world #%ld", value);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("outTopic", msg);
-  }*/
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -239,6 +227,7 @@ void mqtt_loop() {
  *        -Data: JSON-value for JSON-name data [OPTIONAL] --> default value is set in function declaration (see .h file!)
  * return: none
  * purpose: funtion packs message into JSON format and publishes to specified MQTT topic
+ * NOTE: for keypad puzzle, sending data is not used!
  */
 //alternative header for data ARRAY: void mqtt_publish(String topic_name, String Method, String State, int data_array[] = {}, int length_of_array = 0){
 
@@ -251,14 +240,6 @@ void mqtt_publish(String topic_name, String Method, String State, int Data){
   doc["method"] = Method;
   doc["state"] = State;
 
-  /*if(length_of_array != 0){
-      JsonArray data = doc.createNestedArray("data");
-      
-      for(int i = 0; i < length_of_array; i++){
-        data.add(data_array[i]);
-      }
-    }
-  */
   //in case a data (integer value) was handed as parameter
   if(Data != -9999){
     doc["data"] = Data;

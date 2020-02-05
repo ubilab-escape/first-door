@@ -147,7 +147,6 @@ void loop(){
           numb = 0;
           puzzle_state = false;
           puzzle_init = false;
-          //ESP.restart();
         }
 
         //else: wrong password --> blink lcd
