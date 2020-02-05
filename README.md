@@ -2,9 +2,9 @@
 Our group works on the automated doors in the escape room as well on the puzzle for the first door.
 
 ## Content
-* [Part in the Escape Room](#Part in the Escape Room)
+* [Part in the Escape Room](#1)
 
-## Part in the Escape Room
+## Part in the Escape Room <a name="1"></a>
 After the mission briefing the participants will enter the anterior room.
 In the story this will be the room of the security even though the security will be absent for the whole game.
 
