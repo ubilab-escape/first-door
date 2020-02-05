@@ -3,6 +3,11 @@ Our group works on the automated doors in the escape room as well on the puzzle 
 
 ## Content
 * [Part in the Escape Room](#1)
+* [Project Timeline] (#2)
+* [General Program Flow] (#3)
+* [First Puzzle] (#4)
+* [Doors] (#5)
+* [Plasma Globes] (#6)
 
 ## Part in the Escape Room <a name="1"></a>
 After the mission briefing the participants will enter the anterior room.
@@ -12,7 +17,7 @@ The participants have to solve a first puzzle to open the first door and to be a
 
 There the players again have to solve various riddles and puzzle to get into the server room. The door between lab and serverroom will be implemented by us.
 
-## Project Timeline ##
+## Project Timeline <a name="2"></a>
 | Description of work task | Target date | Actual date|
 |:--------------|:-------------|:--------------|
 | Concept finding| 10. Nov 2019 |10. Nov 2019 |
@@ -23,9 +28,10 @@ There the players again have to solve various riddles and puzzle to get into the
 | Testing and Bug fixing| 01. Feb 2020 |  01. Feb 2020 |
 | Presentation| 17. Feb 2020 | 17. Feb 2020 |
 
+## General Program Flow <a name="3"></a>
 
 
-## First Puzzle ##
+## First Puzzle <a name="4"></a>
 ### Stage ###
 After the mission briefing, the participants are in the anteroom and need to get access to the labroom.
 
@@ -41,18 +47,24 @@ The obtained code has to be inserted into a keypad with an LCD display.
 	* LCD display
 	* 4x4 matrix keypad
 	* ESP32
+
 ### Software ###
 The used software is found under *first-door/Final Code/First_Puzzle_final/*.
 //Ablaufdiagramm muss hier rein
+
 ### MQTT Communication ###
+[First Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
 The needed MQTT commands are:
 * "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"on\"}" for activating the puzzle
 * "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"off\"}" for deactivating the puzzle
 
 
-## First Door ##
+## Doors ## <a name="5"></a>
 ### Stage ###
+Door 1:
 This is the door between anteroom and labroom. This door should open after solving the first puzzle and close after all participants entered the labroom. After the participants were able to solve all other riddles the door should open again to let the players escape.
+
+Door 2:
 
 ### Concept and Idea ###
 * sliding door with toothbelt mechanism
@@ -60,7 +72,7 @@ This is the door between anteroom and labroom. This door should open after solvi
 * electromechanical switch detects closed and opened position
 
 Not implemented possible improvements:
-* electrical door lock
+* electrical door lock (not implemented because.....)
 * obstacle detection in closing area: 
 	* variant 1: tracking of current draw (expected to increase significantly if an obstacle is present)
 	* variant 2: ligth barrier (ultra sound) / power measurement of motor
@@ -78,15 +90,17 @@ Not implemented possible improvements:
 * door material (wooden plates)
 * U-profile duct at floor (wooden)
 
-### Software ##
+### Software
 The corresponding software can be found under: *first-door/Final Code/Door_1/*
 
+### MQTT Communication
+[Doors](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
 
-## Dead man switches - Plasma globes ##
+## Plasma globes <a name="6"></a>
 ### Stage ###
 When the first door opens, participants enter the labroom. There, all lights are off and the plasma globes are activated. The participants must touch all plasma balls simultaneously so that the first door can close and the game continues.
 
-### Concept ###
+### Concept and Idea###
 * assumption: plasma globes draw significantly more current when touched so they can be used as switch(___to be tested!___)
 * several plasma globes spread across the room at the walls (not possible to touch more than one globe simultaneously)
 * Each plasma globe is a standalone unit with own ESP32
@@ -104,8 +118,7 @@ When the first door opens, participants enter the labroom. There, all lights are
 * buck converter (24V-->5V)/ power plug
 * current sensor (ACS712)
 
-## Communication ##
-The MQTT communication that was developed with the operator group can be found here:
-* [Doors](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
-* [First Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
-* [Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
+### Software ###
+
+### MQTT Communication ###
+[Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
