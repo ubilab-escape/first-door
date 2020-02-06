@@ -18,34 +18,20 @@
 #define WIFI_SSID_START_ADDRESS 32
 #define WIFI_PWD_START_ADDRESS 64
 
-//mdns - broadcasting name for OTA
-char mdnsName[MAX_MDNS_LEN] = {'\0'};
-
 //Wifi credentials 
 char ssid[] = "";
 char password[] = "";
-//char ssid[] = "";
-//char password[] = "";
 
 //MQTT variables
 //IP address of computer which runs mqtt server (broker) --> mqtt main server ip: 10,0,0,2
 const IPAddress mqttServerIP(10,0,0,2);
 //mqtt device id
 #ifdef DOOR1
-const String clientId = "Group4_Door_Entrance";
+char clientId[] = "Group4_Door_Entrance";
 #endif
 #ifdef DOOR2
-const String clientId = "Group4_Door_Server";
+char clientId[] = "Group4_Door_Server";
 #endif
-
-String mdns_command = "mdns_change:";
-
-WiFiClient wifiClient;
-PubSubClient client(wifiClient);
-long lastMsg = 0;
-char msg[50];
-int value = 0;
-
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -228,31 +214,9 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
     //{"method":"STATUS","state":"active", "data":"closing"}
     //mqtt_publish("4/door/entrance", "status", "active", "closing");
 
-  }
-  
-  /*********************** change mdns name ****************************/
-  /*MDNS stuff not used in door code  
-  else if (Method == "message" && State == (mdns_command + mdnsName)){
-    
-    #ifdef DEBUG
-    Serial.println(F("mdns name change requested"));
-    #endif
-    
-    //adapt mdns name in eeprom (flash) to the string in Data variable
-    //This also changes the MQTT client name!
-    writeMDNS(Data.c_str());
-    #ifdef DEBUG
-    Serial.print(F("New OTA and MQTT name: "));
-    Serial.println(Data.c_str());
-    Serial.print("Restarting to see changed name...");
-    delay(1000);   
-    #endif
+  }  
 
-    //restart the esp to see changed name in OTA
-    ESP.restart();  
-  }
-  */
-  /*********************** reset esp ****************************/  
+  /*********************** restart esp ****************************/  
   else if (Method == "message" && State == "restart"){
     ESP.restart();
 
@@ -277,7 +241,7 @@ void mqtt_loop() {
     Serial.print("Attempting MQTT connection...");
     #endif
     // Attempt to connect
-    if (client.connect(mdnsName)) {
+    if (client.connect(clientId)) {
       #ifdef DEBUG
       Serial.println("connected");
       #endif
@@ -301,16 +265,6 @@ void mqtt_loop() {
   }
   
   client.loop();
-  /*
-  long now = millis();
-  if (now - lastMsg > 2000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 50, "hello world #%ld", value);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("outTopic", msg);
-  }*/
 }
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
@@ -333,15 +287,7 @@ void mqtt_publish(String topic_name, String Method, String State, String Data){
   doc["method"] = Method;
   doc["state"] = State;
 
-  /*if(length_of_array != 0){
-      JsonArray data = doc.createNestedArray("data");
-      
-      for(int i = 0; i < length_of_array; i++){
-        data.add(data_array[i]);
-      }
-    }
-  */
-  //in case a data (integer value) was handed as parameter
+  //in case data was handed as parameter
   if(Data != ""){
     doc["data"] = Data;
   }
@@ -362,137 +308,4 @@ void mqtt_publish(String topic_name, String Method, String State, String Data){
   if (client.publish(topic_name.c_str(), JSONmessageBuffer) == false) {
     Serial.println("Error sending message");
   }
-}
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-
-/****************************************************
- * Init the MDNs name from eeprom, only the number ist
- * stored in the eeprom, construct using prefix.
- ****************************************************/
-/*
-void initMDNS() {
-  // Load the MDNS name from eeprom
-  EEPROM.begin(2*MAX_MDNS_LEN);
-  
-  char * name = getMDNS();
-  if (strlen(name) == 0) {
-    Serial.println(F("Info:Sth wrong with mdns"));
-    //use clientID as default mdns name
-    strcpy(name, clientId.c_str());
-  }
-  // Setting up MDNs with the given Name
-  Serial.print(F("Info:MDNS Name: ")); Serial.println(name);
-  if (!MDNS.begin(String(name).c_str())) {             // Start the mDNS responder for esp8266.local
-    Serial.println(F("Info:Error setting up MDNS responder!"));
-  }
-}
-
-char * getMDNS() {
-  uint16_t address = MDNS_START_ADDRESS;
-  uint8_t chars = 0;
-  EEPROM.get(address, chars);
-  address += sizeof(chars);
-  if (chars < MAX_MDNS_LEN) {
-    EEPROM.get(address, mdnsName);
-  }
-  return mdnsName;
-}
-
-void writeMDNS(const char * newName) {
-  uint16_t address = MDNS_START_ADDRESS;
-  uint8_t chars = strlen(newName);
-  EEPROM.put(address, chars);
-  address += sizeof(chars);
-  for (uint8_t i = 0; i < chars; i++) EEPROM.put(address+i, newName[i]);
-  EEPROM.put(address+chars, '\0');
-  EEPROM.commit();
-}
-*/
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-//***save/load the wifi credentials to/ from eeprom
-void loadCredentials() {
-  EEPROM.begin(512);
-  
-  /*
-  EEPROM.get(MAX_MDNS_LEN, ssid);
-  Serial.print("read ssid: ");
-  Serial.println(ssid);
-  EEPROM.get(MAX_MDNS_LEN+sizeof(ssid), password);
-  char ok[2+1];
-  EEPROM.get(MAX_MDNS_LEN+sizeof(ssid)+sizeof(password), ok);
-  EEPROM.end();
-  if (String(ok) != String("OK")) {
-    ssid[0] = 0;
-    password[0] = 0;
-  }
-  Serial.println("Recovered credentials:");
-  //Serial.println(ssid);
-  Serial.println(strlen(password)>0?"********":"<no password>");
-  */
-
-  uint16_t address = WIFI_SSID_START_ADDRESS;
-  uint8_t chars = 0;
-  EEPROM.get(address, chars);
-  address += 1;
-  if (chars < MAX_WIFI_LEN) {
-    for (uint8_t i = 0; i < chars+1; i++) EEPROM.get(address+i, ssid[i]);
-  }
-  //int leng = strlen(ssid);
-  //ssid[leng+1] = '\0';
-  Serial.print("ssid length: ");
-  Serial.println(strlen(ssid));
-  Serial.print("read ssid: ");
-  for (uint8_t i = 0; i <= strlen(ssid); i++){
-  Serial.print(ssid[i]);
-  }
-  Serial.println("");
-
-  address = WIFI_PWD_START_ADDRESS;
-  chars = 0;
-  EEPROM.get(address, chars);
-  address += sizeof(chars);
-  if (chars < MAX_WIFI_LEN) {
-    for (uint8_t i = 0; i < chars+1; i++) EEPROM.get(address+i, password[i]);
-  }
-  Serial.print("pwd length: ");
-  Serial.println(strlen(password));
-  Serial.print("read pwd: ");
-  for (uint8_t i = 0; i <= strlen(ssid); i++){
-  Serial.print(password[i]);
-  }
-  Serial.println("");
-
-  
-}
-
-//-----------------------------------------------------------------------
-void saveCredentials() {
-  
-  uint16_t address = WIFI_SSID_START_ADDRESS;
-  uint8_t chars = strlen(ssid);
-  
-  EEPROM.begin(512);
-  EEPROM.put(address, chars);
-  address += 1;
-  for (uint8_t i = 0; i < chars; i++) EEPROM.put(address+i, ssid[i]);
-  EEPROM.put(address+chars, '\0');
-
-  address = WIFI_PWD_START_ADDRESS;
-  chars = strlen(password);
-  EEPROM.put(address, chars);
-  address += 1;
-  for (uint8_t i = 0; i < chars; i++) EEPROM.put(address+i, password[i]);
-  EEPROM.put(address+chars, '\0');
-  
-  /*
-  EEPROM.put(MAX_MDNS_LEN, ssid);
-  Serial.print("write in eeprom (ssid): ");
-  Serial.println(ssid);
-  EEPROM.put(MAX_MDNS_LEN+sizeof(ssid), password);
-  char ok[2+1] = "OK";
-  EEPROM.put(MAX_MDNS_LEN+sizeof(ssid)+sizeof(password), ok);
-  */
-  EEPROM.commit();
-  EEPROM.end();
 }

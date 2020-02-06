@@ -20,12 +20,16 @@
 //For code debugging
 //#define DEBUG
 
+//**********************************IMPORTANT*********************************************************************************************************
 //This should be either "DOOR1" or "DOOR2" for the respective door
 #define DOOR2
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Variables ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//wifi, mqtt clients
+WiFiClient wifiClient;
+PubSubClient client(wifiClient);
 
 //ESP 32 Pin Connections
 
@@ -75,7 +79,13 @@ bool brakeClose = false;
 volatile int interruptFlagO = 0;
 volatile int interruptFlagC = 0;
 
-
+//variables for alarm light
+#ifdef DOOR1
+String light_topic = "powermeter/gyrophare1/switch";
+#endif
+#ifdef DOOR2
+String light_topic = "powermeter/gyrophare2/switch";
+#endif
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -110,18 +120,24 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(interruptOpenPin), interruptOpen, FALLING); //Interrupt at the end of door opening due to switch touching
   attachInterrupt(digitalPinToInterrupt(interruptClosePin), interruptClose, RISING); //Interrupt at the end of door closing due to switch touching
 
-  //save WiFi credentials in eeprom (set the credentials in the variables ssid and password declared above)
-  //***only to be done once***
-  //saveCredentials();
-  //load WiFi credentials from eeprom
-  //loadCredentials();
-
   setup_wifi();
   setupOTA();
   setup_mqtt();
+  //start MQTT communication
+  mqtt_loop();
 
   //after wifi stuff calibrate the door!
+  //turn alarm light on
+  client.publish(light_topic.c_str(), "on");
   calibration();
+
+  //after calibration open the door that all rooms are open
+  openDoor = true;
+  openDoorFunc();
+  openDoor = false;
+
+  //turn alarm light off
+  client.publish(light_topic.c_str(), "off");
 }
 
 
@@ -141,12 +157,22 @@ void loop() {
   mqtt_loop();
 
   if (openDoor == true) {
+    
+    //activate alarm light
+    client.publish(light_topic.c_str(), "on");
     openDoorFunc();
     openDoor = false;
+    //turn alarm light off
+    client.publish(light_topic.c_str(), "off");
+    
   }
   else if (closeDoor == true) {
+    //activate alarm light
+    client.publish(light_topic.c_str(), "on");
     closeDoorFunc();
     closeDoor = false;
+    //turn alarm light off
+    client.publish(light_topic.c_str(), "off");
   }
 
 }

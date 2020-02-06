@@ -1,7 +1,6 @@
 #ifndef WiFi_MQTT_Json_Motor_H
 #define WiFi_MQTT_Json_Motor_H
 
-
 //variables
 long mdnsUpdate = millis();
 
