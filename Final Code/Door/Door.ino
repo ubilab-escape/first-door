@@ -419,9 +419,13 @@ void MoveDoor() {
       {
       delay(1000);
       digitalWrite(enPin, HIGH); //Disable Driving Stage
-      #ifdef DEBUG1
+      #ifdef DOOR1
       //send closed door message to disable plasma globe puzzle
       mqtt_publish("4/door/entrance", "message", "door_1_closed");
+      //avoid reopening if plasma globes are released before they read the message
+      delay(1000);
+      mqtt_loop();
+      if(openDoor == true) openDoor = false;
       #endif
       return;
       }
@@ -466,6 +470,10 @@ void MoveDoorSlow() {
         #ifdef DOOR1
         //send closed door message to disable plasma globe puzzle
         mqtt_publish("4/globes", "message", "door_1_closed");
+        //avoid reopening if plasma globes are released before they read the message
+        delay(1000);
+        mqtt_loop();
+        if(openDoor == true) openDoor = false;
         #endif
         return;
       }
@@ -477,6 +485,10 @@ void MoveDoorSlow() {
       #ifdef DEBUG1
       //send closed door message to disable plasma globe puzzle
       mqtt_publish("4/door/entrance", "message", "door_1_closed");
+      //avoid reopening if plasma globes are released before they read the message
+      delay(1000);
+      mqtt_loop();
+      if(openDoor == true) openDoor = false;
       #endif
     }
   }
