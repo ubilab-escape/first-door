@@ -50,7 +50,8 @@ The obtained code has to be inserted into a keypad with an LCD display.
 
 ### Software ###
 The used software is found under *first-door/Final Code/First_Puzzle_final/*.
-//Ablaufdiagramm muss hier rein
+
+![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/Main%20Programm.png)
 
 ### MQTT Communication ###
 [First Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
