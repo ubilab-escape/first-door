@@ -60,7 +60,7 @@ The needed MQTT commands are:
 * "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"off\"}" for deactivating the puzzle
 
 
-## Doors ## <a name="5"></a>
+## Doors <a name="5"></a>
 ### Stage ###
 Door 1:
 This is the door between anteroom and labroom. This door should open after solving the first puzzle and close after all participants entered the labroom. After the participants were able to solve all other riddles the door should open again to let the players escape.
