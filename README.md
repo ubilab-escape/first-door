@@ -126,6 +126,7 @@ When the first door opens, participants enter the labroom. There, all lights are
 
 ### Software ###
 [Master Globe - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/PowerMeter_plasma_master)
+
 [Slave Globe - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/PowerMeter_plasma_slaves)
 
 The following flow chart only represents the basic function of the code and does not show every detail!
@@ -139,5 +140,5 @@ The MQTT communication that was initially developed with the operator group can 
 * [Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
 
 For controlling the described escape room parts of our group, use the commands in the following document:
-[MQTT commands] (https://github.com/ubilab-escape/first-door/blob/master/MQTT_publish_messages.docx)
+[MQTT commands] (https://github.com/ubilab-escape/first-door/blob/master/MQTT_publish_messages.docx "MQTT commands")
 
