@@ -32,13 +32,13 @@ There the players again have to solve various riddles and puzzle to get into the
 ## General Program Flow <a name="3"></a>
 
 ## Using the Code <a name="7"></a>
-###General
-*WiFi- credentials are not included in the code. Before uploading via OTA, ensure that the correct WiFi credentials are set in the code!
+### General
+* WiFi- credentials are not included in the code. Before uploading via OTA, ensure that the correct WiFi credentials are set in the code!
 
-###Door Code
-*Ensure that the #define macro DOOR1 or DOOR2 is set according to which door you want to use the code for
+### Door Code
+* Ensure that the #define macro DOOR1 or DOOR2 is set according to which door you want to use the code for
 
-##Plasma Globes
+### Plasma Globes
 * When you change the mdns name via MQTT, this will also change the ID of the globe (gets written to EEPROM). Use the Format "GlobeX" as new name, e.g. "Globe0" for the Master Globe.
 * Max. 4 globes can be used (IDs: 0,1,2,3)
 
