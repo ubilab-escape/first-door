@@ -49,7 +49,7 @@ The obtained code has to be inserted into a keypad with an LCD display.
 	* ESP32
 
 ### Software ###
-The used software is found under *first-door/Final Code/First_Puzzle_final/*.
+[Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/First_Puzzle_final)
 
 The following flow chart only represents the basic function of the code and does not show every detail!
 
@@ -94,7 +94,7 @@ Not implemented possible improvements:
 * U-profile duct at floor (wooden)
 
 ### Software
-The corresponding software can be found under: *first-door/Final Code/Door_1/*
+[Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/Door)
 
 ### MQTT Communication
 [Doors](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
@@ -125,9 +125,19 @@ When the first door opens, participants enter the labroom. There, all lights are
 * 4 usb powered plasma globes
 
 ### Software ###
+[Master Globe - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/PowerMeter_plasma_master)
+[Slave Globe - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/PowerMeter_plasma_slaves)
+
 The following flow chart only represents the basic function of the code and does not show every detail!
 ![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Master_globe_flowchart.png)
 
 
-### MQTT Communication ###
-[Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
+## MQTT Communication ##
+The MQTT communication that was initially developed with the operator group can be found here (not every detail was implemented):
+* [Doors](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
+* [First Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
+* [Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
+
+For controlling the described escape room parts of our group, use the commands in the following document:
+[MQTT commands] (https://github.com/ubilab-escape/first-door/blob/master/MQTT_publish_messages.docx)
+
