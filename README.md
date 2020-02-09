@@ -55,13 +55,6 @@ The following flow chart only represents the basic function of the code and does
 
 ![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/First_Puzzle_flowchart.png)
 
-### MQTT Communication ###
-[First Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
-The needed MQTT commands are:
-* "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"on\"}" for activating the puzzle
-* "4/puzzle" -m "{\"method\":\"trigger\", \"state\": \"off\"}" for deactivating the puzzle
-
-
 ## Doors <a name="5"></a>
 ### Stage ###
 Door 1:
@@ -95,9 +88,6 @@ Not implemented possible improvements:
 
 ### Software
 [Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/Door)
-
-### MQTT Communication
-[Doors](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_door.svg "Doors")
 
 ## Plasma globes <a name="6"></a>
 ### Stage ###
