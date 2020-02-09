@@ -93,7 +93,7 @@ Not implemented possible improvements:
 ### Stage ###
 When the first door opens, participants enter the labroom. There, all lights are off and the plasma globes are activated. The participants must touch all plasma balls simultaneously so that the first door can close and the game continues.
 
-### Concept and Idea###
+### Concept and Idea ###
 * plasma globes draw significantly more current when touched so they can be used as switch
 * 4 plasma globes spread across the room at the walls (not possible to touch more than one globe simultaneously)
 * Each plasma globe is a standalone unit with own PowerMeter 
