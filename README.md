@@ -96,7 +96,7 @@ When the first door opens, participants enter the labroom. There, all lights are
 ### Concept and Idea ###
 * plasma globes draw significantly more current when touched so they can be used as switch
 * 4 plasma globes spread across the room at the walls (not possible to touch more than one globe simultaneously)
-* Each plasma globe is a standalone unit with own PowerMeter 
+* Each plasma globe is a standalone unit with own "PowerMeter"
 * One "master" device, the other globes are slaves
 * operator sends #participants, then each globe determines if it is activated or deactivated (according to globe ID which can be set over MQTT)
 * Slave globes:
@@ -130,5 +130,4 @@ The MQTT communication that was initially developed with the operator group can 
 * [Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
 
 For controlling the described escape room parts of our group, use the commands in the following document:
-[MQTT commands] (https://github.com/ubilab-escape/first-door/blob/master/MQTT_publish_messages.docx "MQTT commands")
-
+[MQTT commands](https://github.com/ubilab-escape/first-door/blob/master/MQTT_publish_messages.docx "MQTT commands")
