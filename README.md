@@ -51,6 +51,8 @@ The obtained code has to be inserted into a keypad with an LCD display.
 ### Software ###
 The used software is found under *first-door/Final Code/First_Puzzle_final/*.
 
+The following flow chart only represents the basic function of the code and does not show every detail!
+
 ![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/Main%20Programm.png)
 
 ### MQTT Communication ###
@@ -108,21 +110,23 @@ When the first door opens, participants enter the labroom. There, all lights are
 * One "master" device, the other globes are slaves
 * operator sends #participants, then each globe determines if it is activated or deactivated (according to globe ID which can be set over MQTT)
 * Slave globes:
-...*check if globe is touched
-...*send touched/ untouched message to master globe
+	* check if globe is touched
+	* send touched/ untouched message to master globe
 * Master globes:
-	** check if globe is touched
-	** count number of touched slaves
-	** trigger opening of door if all participating globes are touched simultaneously
-	** trigger closing of door if not all participating globes are touched
-	** activate environment LEDs according to number of touched slaves to provide feedback to the user
-	** deactivates all globes as soon as door is closed and send puzzle solved message
+	* check if globe is touched
+	* count number of touched slaves
+	* trigger opening of door if all participating globes are touched simultaneously
+	* trigger closing of door if not all participating globes are touched
+	* activate environment LEDs according to number of touched slaves to provide feedback to the user
+	* deactivates all globes as soon as door is closed and send puzzle solved message
 
 ### Hardware ###
 * PowerMeter (Hardware Box containing ESP8266 and AC current sensor )
 * 4 usb powered plasma globes
 
 ### Software ###
+The following flow chart only represents the basic function of the code and does not show every detail!
+
 
 
 ### MQTT Communication ###
