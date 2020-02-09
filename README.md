@@ -53,7 +53,7 @@ The used software is found under *first-door/Final Code/First_Puzzle_final/*.
 
 The following flow chart only represents the basic function of the code and does not show every detail!
 
-![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/Main%20Programm.png)
+![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/First_Puzzle_flowchart.png)
 
 ### MQTT Communication ###
 [First Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_entrance_door.svg "First Puzzle")
@@ -126,7 +126,7 @@ When the first door opens, participants enter the labroom. There, all lights are
 
 ### Software ###
 The following flow chart only represents the basic function of the code and does not show every detail!
-
+![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Master_globe_flowchart.png)
 
 
 ### MQTT Communication ###
