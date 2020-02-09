@@ -108,8 +108,8 @@ When the first door opens, participants enter the labroom. There, all lights are
 * One "master" device, the other globes are slaves
 * operator sends #participants, then each globe determines if it is activated or deactivated (according to globe ID which can be set over MQTT)
 * Slave globes:
-	** check if globe is touched
-	** send touched/ untouched message to master globe
+...*check if globe is touched
+...*send touched/ untouched message to master globe
 * Master globes:
 	** check if globe is touched
 	** count number of touched slaves
