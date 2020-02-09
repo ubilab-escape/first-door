@@ -158,12 +158,10 @@ void loop() {
     mdnsUpdate = millis();
   }
 
-  // HTTP Updater
-  // httpServer.handleClient();
   // Arduino OTA
   ArduinoOTA.handle();
 
-  // Update mdns only on idle
+  // Update mdns
   MDNS.update();
   // Re-advertise service
   if ((long)(millis() - mdnsUpdate) >= 0) {

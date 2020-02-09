@@ -19,7 +19,7 @@
 #define WIFI_PWD_START_ADDRESS 64
 
 //Wifi credentials 
-char ssid[] = "";
+char ssid[] = "ubilab_wifi";
 char password[] = "";
 
 //MQTT variables
