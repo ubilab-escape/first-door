@@ -5,7 +5,7 @@ Our group works on the automated doors in the escape room as well on the puzzle 
 * [Part in the Escape Room](#1)
 * [Project Timeline](#2)
 * [General Program Flow](#3)
-* [Using the code] (#7)
+* [Using the code](#7)
 * [First Puzzle](#4)
 * [Doors](#5)
 * [Plasma Globes](#6)
