@@ -101,24 +101,28 @@ The corresponding software can be found under: *first-door/Final Code/Door_1/*
 When the first door opens, participants enter the labroom. There, all lights are off and the plasma globes are activated. The participants must touch all plasma balls simultaneously so that the first door can close and the game continues.
 
 ### Concept and Idea###
-* assumption: plasma globes draw significantly more current when touched so they can be used as switch(___to be tested!___)
-* several plasma globes spread across the room at the walls (not possible to touch more than one globe simultaneously)
-* Each plasma globe is a standalone unit with own ESP32
+* plasma globes draw significantly more current when touched so they can be used as switch
+* 4 plasma globes spread across the room at the walls (not possible to touch more than one globe simultaneously)
+* Each plasma globe is a standalone unit with own PowerMeter 
 * One "master" device, the other globes are slaves
-* operator sends #participants, then each globe determines if it is activated or deactivated
-* each slave globe sends status (touched/ not touched) to master globe
-* only if all globes are touched simultaneously, door should close (otherwise, it should open again)
-* master globe communicates with first door and triggers opening/closing of door
-* as soon as door is closed, it publishes a message to deactivate all globes (puzzle solved)
-* _alternative_: use push buttons
+* operator sends #participants, then each globe determines if it is activated or deactivated (according to globe ID which can be set over MQTT)
+* Slave globes:
+	** check if globe is touched
+	** send touched/ untouched message to master globe
+* Master globes:
+	** check if globe is touched
+	** count number of touched slaves
+	** trigger opening of door if all participating globes are touched simultaneously
+	** trigger closing of door if not all participating globes are touched
+	** activate environment LEDs according to number of touched slaves to provide feedback to the user
+	** deactivates all globes as soon as door is closed and send puzzle solved message
 
 ### Hardware ###
-* ESP32
-* plasma globes
-* buck converter (24V-->5V)/ power plug
-* current sensor (ACS712)
+* PowerMeter (Hardware Box containing ESP8266 and AC current sensor )
+* 4 usb powered plasma globes
 
 ### Software ###
+
 
 ### MQTT Communication ###
 [Plasma Globe Puzzle](https://github.com/ubilab-escape/operator/blob/master/doc/design/group_4_puzzle_globes.svg "Plasma Globe Puzzle")
