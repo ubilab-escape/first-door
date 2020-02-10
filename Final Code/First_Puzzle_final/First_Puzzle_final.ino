@@ -33,7 +33,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 //Initialisation Keypad
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //four columns
-const byte PWNUMB = 4; // six digit number
+const byte PWNUMB = 4; // four digit number
 
 //define the cymbols on the buttons of the keypads
 char hexaKeys[ROWS][COLS] = {
