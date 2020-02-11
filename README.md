@@ -19,19 +19,19 @@ The participants have to solve a first puzzle to open the first door and to be a
 There the players again have to solve various riddles and puzzle to get into the server room. The door between lab and serverroom will be implemented by us.
 
 ## Project Timeline <a name="2"></a>
-* Concept finding for door mechanism, puzzles and dead man switches
-* Composition of a part list
-* Installing of the doors
-* Software development of the doors and electrical installation
-* Software development of the riddle and installation of its needed components
-* Software development of the MQTT communication
-* Testing of the door and riddle components over MQTT
-* Testing of the voltage/current course of the plasma globes
-* Software implementation of the plasma globes
-* 3D printing of fixations and riddle housing
-* Testing of the interaction of all components
-* Implementation and control over the LED stripes from the Environment Group
-* Last testing and bug fixing
+- [x] Concept finding for door mechanism, puzzles and dead man switches
+- [x] Composition of a part list
+- [x] Installing of the doors
+- [x] Software development of the doors and electrical installation
+- [x] Software development of the riddle and installation of its needed components
+- [x] Software development of the MQTT communication
+- [x] Testing of the door and riddle components over MQTT
+- [x] Testing of the voltage/current course of the plasma globes
+- [x] Software implementation of the plasma globes
+- [x] 3D printing of fixations and riddle housing
+- [x] Testing of the interaction of all components
+- [x] Implementation and control over the LED stripes from the Environment Group
+- [x] Last testing and bug fixing
 * Final run and presentation
 
 ## General Program Flow <a name="3"></a>
