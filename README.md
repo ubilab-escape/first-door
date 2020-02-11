@@ -32,7 +32,7 @@ There the players again have to solve various riddles and puzzle to get into the
 - [x] Testing of the interaction of all components
 - [x] Implementation and control over the LED stripes from the Environment Group
 - [x] Last testing and bug fixing
-* Final run and presentation
+- [ ] Final run and presentation
 
 ## General Program Flow <a name="3"></a>
 
