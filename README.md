@@ -64,7 +64,8 @@ The obtained code has to be inserted into a keypad with an LCD display.
 	* LCD display
 	* 4x4 matrix keypad
 	* ESP32
-The parts for 3D printing the input interface can be founded [HERE](https://github.com/ubilab-escape/first-door/tree/master/3D%20Printing)
+
+The parts for 3D printing the input interface can be founded [here](https://github.com/ubilab-escape/first-door/tree/master/3D%20Printing)
 ### Software ###
 [Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/First_Puzzle_final)
 
@@ -130,6 +131,8 @@ When the first door opens, participants enter the labroom. There, all lights are
 ### Hardware ###
 * PowerMeter (Hardware Box containing ESP8266 and AC current sensor )
 * 4 usb powered plasma globes
+
+The files for the 3D printed mounting can be found [here](https://github.com/ubilab-escape/first-door/tree/master/3D%20Printing)
 
 ### Software ###
 [Master Globe - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/PowerMeter_plasma_master)
