@@ -19,15 +19,20 @@ The participants have to solve a first puzzle to open the first door and to be a
 There the players again have to solve various riddles and puzzle to get into the server room. The door between lab and serverroom will be implemented by us.
 
 ## Project Timeline <a name="2"></a>
-| Description of work task | Target date | Actual date|
-|:--------------|:-------------|:--------------|
-| Concept finding| 10. Nov 2019 |10. Nov 2019 |
-| First part list| 12. Nov 2019 | 12. Nov 2019|
-| Implementation Hardware door| 01. Dec 2019| 01. Dec 2019|
-| Riddle Implementation| 31. Dec 2019| 31. Dec 2019| 
-| Dead man switch| 10 Jan 2020 | 10. Jan 2020|
-| Testing and Bug fixing| 01. Feb 2020 |  01. Feb 2020 |
-| Presentation| 17. Feb 2020 | 17. Feb 2020 |
+- [x] Concept finding for door mechanism, puzzles and dead man switches
+- [x] Composition of a part list
+- [x] Installing of the doors
+- [x] Software development of the doors and electrical installation
+- [x] Software development of the riddle and installation of its needed components
+- [x] Software development of the MQTT communication
+- [x] Testing of the door and riddle components over MQTT
+- [x] Testing of the voltage/current course of the plasma globes
+- [x] Software implementation of the plasma globes
+- [x] 3D printing of fixations and riddle housing
+- [x] Testing of the interaction of all components
+- [x] Implementation and control over the LED stripes from the Environment Group
+- [x] Last testing and bug fixing
+- [ ] Final run and presentation
 
 ## General Program Flow <a name="3"></a>
 
