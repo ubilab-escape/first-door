@@ -64,7 +64,7 @@ The obtained code has to be inserted into a keypad with an LCD display.
 	* LCD display
 	* 4x4 matrix keypad
 	* ESP32
-
+The parts for 3D printing the input interface can be founded [HERE](https://github.com/ubilab-escape/first-door/tree/master/3D%20Printing)
 ### Software ###
 [Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/First_Puzzle_final)
 
