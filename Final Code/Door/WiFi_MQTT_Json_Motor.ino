@@ -20,7 +20,7 @@
 
 //Wifi credentials 
 char ssid[] = "ubilab_wifi";
-char password[] = "";
+char password[] = ;
 
 //MQTT variables
 //IP address of computer which runs mqtt server (broker) --> mqtt main server ip: 10,0,0,2

@@ -30,10 +30,16 @@
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+//lcd line characters
+char riddle_text[17] = "*** Riddle 1 ***";
+char wrong_code_text[17] = "***Wrong Code***";
+char right_code_text[17] = "***Right Code***";
+char empty_line[17] = "                ";
+
 //Initialisation Keypad
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //four columns
-const byte PWNUMB = 4; // four digit number
+const byte PWNUMB = 4; // six digit number
 
 //define the cymbols on the buttons of the keypads
 char hexaKeys[ROWS][COLS] = {
@@ -107,24 +113,38 @@ void loop(){
     puzzle_init = true;
     Serial.println(puzzle_init);
     // Turn on the blacklight and print a message.
-    lcd.clear();
+    //lcd.clear();
     lcd.backlight();
-    lcd.print("*** Riddle 1 ***");
-    // Wait 5 seconds
-    delay(5000);
-    lcd.clear();
-    delay(1000);   
+    lcd.setCursor(0,0);
+    lcd.print(riddle_text);
+    lcd.print(empty_line);
+    // Wait 3 seconds
+    delay(3000);
+    lcd.setCursor(0,0);
+    lcd.print(empty_line);
+    lcd.print(empty_line);
+    lcd.setCursor(0,0);
+    delay(500);   
   }
 
   //check keypad input
   if(puzzle_state == true){
-    if(numb==0)lcd.clear();
+    
+    //get input character of keypad
     char customKey = customKeypad.getKey();
-    //lcd.clear();
+    
+    //if something was typed in
     if (customKey) {
+      //write corresponding character to current lcd position
+      lcd.setCursor(numb,0);
       myInput[numb] = customKey;
       lcd.print(customKey);
+      //write empty line in 2nd lcd line
+      lcd.setCursor(0,1);
+      lcd.print(empty_line);
+      //increase number of typed characters
       numb++;
+      
       //if 4 digits entered
       if (numb == PWNUMB ) {
         delay(300);
@@ -132,18 +152,24 @@ void loop(){
         Serial.print("entered passwort: ");
         Serial.println(myInput);
         #endif
+        
         //if password correct
         if (strncmp(myInput, myPasswort,4) == 0) {
+          
           // send puzzle solved message
           mqtt_publish("4/puzzle", "status", "solved");
-          //mqtt_publish("4/door/entrance","trigger","on");
-          //turn off lcd
+
+          //print code accepted to lcd
           delay(200);
-          lcd.clear();
-          lcd.printstr("Code Accepted");
+          lcd.setCursor(0,0);
+          lcd.print(right_code_text);
+          lcd.print(empty_line);
           delay(1000);
+          //turn off lcd
           lcd.noBacklight();
-          lcd.clear();
+          lcd.setCursor(0,0);
+          lcd.print(empty_line);
+          lcd.print(empty_line);
           numb = 0;
           puzzle_state = false;
           puzzle_init = false;
@@ -152,9 +178,9 @@ void loop(){
         //else: wrong password --> blink lcd
         else {
           blinkit = 0;
+          lcd.setCursor(0,0);
+          lcd.print(wrong_code_text);
           while (blinkit < 4) {
-            lcd.clear();
-            lcd.printstr("Code wrong");
             lcd.noBacklight();
             delay(200);
             lcd.backlight();
@@ -162,7 +188,10 @@ void loop(){
             myInput[blinkit] = '\0';
             blinkit++;
           }
-          lcd.clear();
+          //clear lcd and set cursor back to start
+          lcd.setCursor(0,0);
+          lcd.print(empty_line);
+          lcd.print(empty_line);
           numb = 0;
         }
       }

@@ -30,7 +30,7 @@ IPAddress secondaryDNS(8, 8, 4, 4); //optional
 */
 
 const char* ssid = "ubilab_wifi";
-const char* password = "";
+const char* password = ;
 
 //MQTT variables
 //const char* mqtt_server = "broker.mqtt-dashboard.com";
@@ -158,9 +158,13 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 
     //set puzzle state variable
     puzzle_state = false;
+    puzzle_init = false;
     //respond to off message
     //{"method":"status","state":"inactive"}
     mqtt_publish("4/puzzle", "status", "inactive");
+    //turn off LCD
+    lcd.noBacklight();
+    lcd.clear();
   }
   
   /*********************** change mdns name ****************************/

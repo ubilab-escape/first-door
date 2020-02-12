@@ -38,8 +38,8 @@ STPM stpm34(STPM_RES, STPM_CS, STPM_SYN);
 
 
 // WLAN configuration
-const char *ssids[] = {};
-const char *passwords[] = {};
+const char *ssids[] = ; //use {"ssid"}
+const char *passwords[] = ; //use {"pwd"}
 
 char mdnsName[MAX_MDNS_LEN] = {'\0'};
 
