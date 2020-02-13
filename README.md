@@ -82,9 +82,9 @@ Door 2:
 This door seperates the labroom from the serverroom. After solving all puzzles in the labroom this door will open automatically and provide access to the serverroom.
 
 ### Concept and Idea ###
-*both doors should open automatically and have to be controllable by the operator via MQTT commands
-*a detection mechanism should be implemented for localization of participants standing in between the door frame while closing
-*the participants shouldn't be able to open the doors manually by hand (--> lock)
+* both doors should open automatically and have to be controllable by the operator via MQTT commands
+* a detection mechanism should be implemented for localization of participants standing in between the door frame while closing
+* the participants shouldn't be able to open the doors manually by hand (--> lock)
 
 A concept of a sliding door with a toothbelt mechanism was developed. The door is suspended and guided through a linear sliding rail on the upper door frame. Furthermore a U-profile duct was mounted for guidance at the bottom. The door movement is achieved by a toothbelt mechanism. Both ends of the toothbelt are fixed on the door. Return shafts on both sides of the door frame are redirecting the toothbelt. Also one return shaft is connected to the stepper motor axes. Mechanical switches (endstops) on both sides detect either closed or opened position.
 
@@ -111,11 +111,11 @@ Not implemented / possible improvements:
 
 In the following the velocity profile of the door is shown. 
 
-![Velocity_profile](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Diagramm%20Door.pdf)
+![Velocity_profile](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Velocity_Profile.PNG)
 
-*Acceleration, velocity and distance parameters (acceleration / accelerationBrake / maxVelocity / minVelocity / minVelSteps / moveOn) must be chosen before code flashing.
-*The parameters brakeSteps and brakeStepsInput are calculated by 0.5*minvelocity^2/acceleration or 0.5*maxVelocitty^2/accelerationBrake. 
-*The parameter maxSteps is set and the variable curPos is reset after calibration.
+* Acceleration, velocity and distance parameters (acceleration / accelerationBrake / maxVelocity / minVelocity / minVelSteps / moveOn) must be chosen before code flashing.
+* The parameters brakeSteps and brakeStepsInput are calculated by 0.5*minvelocity^2/acceleration or 0.5*maxVelocitty^2/accelerationBrake. 
+* The parameter maxSteps is set and the variable curPos is reset after calibration.
 
 The programming flowchart is attached in the following. The flow chart only represents the basic function of the code and does not show every detail!
 
