@@ -73,39 +73,57 @@ The following flow chart only represents the basic function of the code and does
 
 ![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/First_Puzzle_flowchart.png)
 
-## Doors <a name="5"></a>
+## Doors ## <a name="5"></a>
 ### Stage ###
 Door 1:
-This is the door between anteroom and labroom. This door should open after solving the first puzzle and close after all participants entered the labroom. After the participants were able to solve all other riddles the door should open again to let the players escape.
+This is the door between anteroom and labroom. This door should open after solving the first puzzle (Morse Code Puzzle) and close after all participants entered the labroom. After the participants were able to solve all other riddles the door should open again to let the players escape.
 
 Door 2:
+This door seperates the labroom from the serverroom. After solving all puzzles in the labroom this door will open automatically and provide access to the serverroom.
 
 ### Concept and Idea ###
-* sliding door with toothbelt mechanism
-* opened/closed automatically by step-motor
-* electromechanical switch detects closed and opened position
+*both doors should open automatically and have to be controllable by the operator via MQTT commands
+*a detection mechanism should be implemented for localization of participants standing in between the door frame while closing
+*the participants shouldn't be able to open the doors manually by hand (--> lock)
 
-Not implemented possible improvements:
-* electrical door lock (not implemented because.....)
-* obstacle detection in closing area: 
-	* variant 1: tracking of current draw (expected to increase significantly if an obstacle is present)
-	* variant 2: ligth barrier (ultra sound) / power measurement of motor
+A concept of a sliding door with a toothbelt mechanism was developed. The door is suspended and guided through a linear sliding rail on the upper door frame. Furthermore a U-profile duct was mounted for guidance at the bottom. The door movement is achieved by a toothbelt mechanism. Both ends of the toothbelt are fixed on the door. Return shafts on both sides of the door frame are redirecting the toothbelt. Also one return shaft is connected to the stepper motor axes. Mechanical switches (endstops) on both sides detect either closed or opened position.
+
+An obstacle detection in the closing area could be avoided through the usage of the Plasma Globes. Every participant in the Escape Room has to touch one Plasma Globe for closing the door. A person in the closing area is therefore impossible.
+
+Not implemented / possible improvements:
+* electrical door lock: solved by driving stage remains "on" while door is closed
+
 
 ### Hardware ###
 * ESP32
 * stepper motor + appropriate driver
+* 24V power supply
+* buck converter for ESP32 power supply (24V --> 5V)
 * tooth belt
 * toothbelt disk
-* electrical lock
 * end stop switches
 * linear rail
-* mounting door - linear track
-* mounting door - tooth belt
+* sliding suspension bracket
 * door material (wooden plates)
-* U-profile duct at floor (wooden)
+* U-profile duct
 
 ### Software
-[Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/Door)
+
+In the following the velocity profile of the door is shown. 
+
+![Velocity_profile](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Diagramm%20Door.pdf)
+
+*Acceleration, velocity and distance parameters (acceleration / accelerationBrake / maxVelocity / minVelocity / minVelSteps / moveOn) must be chosen before code flashing.
+*The parameters brakeSteps and brakeStepsInput are calculated by 0.5*minvelocity^2/acceleration or 0.5*maxVelocitty^2/accelerationBrake. 
+*The parameter maxSteps is set and the variable curPos is reset after calibration.
+
+The programming flowchart is attached in the following. The flow chart only represents the basic function of the code and does not show every detail!
+
+![FlowChart_door](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Door%20Code%20(ServerRoom%20_%20EntranceRoom).jpg)
+
+The corresponding software can be found under: *first-door/Final Code/Door_1/*
+
+[Code - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/Door)
 
 ## Plasma globes <a name="6"></a>
 ### Stage ###
