@@ -4,7 +4,6 @@ Our group works on the automated doors in the escape room as well on the puzzle 
 ## Content
 * [Part in the Escape Room](#1)
 * [Project Timeline](#2)
-* [General Program Flow](#3)
 * [Using the code](#7)
 * [First Puzzle](#4)
 * [Doors](#5)
@@ -32,9 +31,8 @@ There the players again have to solve various riddles and puzzle to get into the
 - [x] Testing of the interaction of all components
 - [x] Implementation and control over the LED stripes from the Environment Group
 - [x] Last testing and bug fixing
-- [ ] Final run and presentation
+- [x] Final run and presentation
 
-## General Program Flow <a name="3"></a>
 
 ## Using the Code <a name="7"></a>
 ### General
@@ -46,6 +44,9 @@ There the players again have to solve various riddles and puzzle to get into the
 ### Plasma Globes
 * When you change the mdns name via MQTT, this will also change the ID of the globe (gets written to EEPROM). Use the Format "GlobeX" as new name, e.g. "Globe0" for the Master Globe.
 * Max. 4 globes can be used (IDs: 0,1,2,3)
+
+### MQTT interaction
+* The commands for controlling the implemented stages can be found in the document linked at the end of this readme!
 
 
 ## First Puzzle <a name="4"></a>
@@ -73,7 +74,7 @@ The following flow chart only represents the basic function of the code and does
 
 ![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/First_Puzzle_flowchart.png)
 
-## Doors ## <a name="5"></a>
+## Doors <a name="5"></a>
 ### Stage ###
 Door 1:
 This is the door between anteroom and labroom. This door should open after solving the first puzzle (Morse Code Puzzle) and close after all participants entered the labroom. After the participants were able to solve all other riddles the door should open again to let the players escape.
@@ -88,10 +89,10 @@ This door seperates the labroom from the serverroom. After solving all puzzles i
 
 A concept of a sliding door with a toothbelt mechanism was developed. The door is suspended and guided through a linear sliding rail on the upper door frame. Furthermore a U-profile duct was mounted for guidance at the bottom. The door movement is achieved by a toothbelt mechanism. Both ends of the toothbelt are fixed on the door. Return shafts on both sides of the door frame are redirecting the toothbelt. Also one return shaft is connected to the stepper motor axes. Mechanical switches (endstops) on both sides detect either closed or opened position.
 
-An obstacle detection in the closing area could be avoided through the usage of the Plasma Globes. Every participant in the Escape Room has to touch one Plasma Globe for closing the door. A person in the closing area is therefore impossible.
+An obstacle detection in the closing area could be avoided through the usage of the Plasma Globes. Every participant in the Escape Room has to touch one Plasma Globe for closing the door. A person in the closing area is therefore impossible. Also, the toothbelt slides over the return shaft, as soon as the door faces a slight resistance.
 
 Not implemented / possible improvements:
-* electrical door lock: solved by driving stage remains "on" while door is closed
+* electrical door lock: solved by leaving driving stage "on" while door is closed, so that more force is needed to push it open.
 
 
 ### Hardware ###
@@ -108,6 +109,7 @@ Not implemented / possible improvements:
 * U-profile duct
 
 ### Software
+[Door - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/Door)
 
 In the following the velocity profile of the door is shown. 
 
@@ -120,10 +122,6 @@ In the following the velocity profile of the door is shown.
 The programming flowchart is attached in the following. The flow chart only represents the basic function of the code and does not show every detail!
 
 ![FlowChart_door](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Door%20Code%20(ServerRoom%20_%20EntranceRoom).jpg)
-
-The corresponding software can be found under: *first-door/Final Code/Door_1/*
-
-[Code - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/Door)
 
 ## Plasma globes <a name="6"></a>
 ### Stage ###
@@ -147,7 +145,7 @@ When the first door opens, participants enter the labroom. There, all lights are
 	* deactivates all globes as soon as door is closed and send puzzle solved message
 
 ### Hardware ###
-* PowerMeter (Hardware Box containing ESP8266 and AC current sensor )
+* PowerMeter (hardware box containing ESP8266 and AC current/voltage sensor )
 * 4 usb powered plasma globes
 
 The files for the 3D printed mounting can be found [here](https://github.com/ubilab-escape/first-door/tree/master/3D%20Printing)
@@ -158,6 +156,7 @@ The files for the 3D printed mounting can be found [here](https://github.com/ubi
 [Slave Globe - Code](https://github.com/ubilab-escape/first-door/tree/master/Final%20Code/PowerMeter_plasma_slaves)
 
 The following flow chart only represents the basic function of the code and does not show every detail!
+This flow chart represents the master instance, slaves work similar, but without logic for door interaction.
 ![flow chart puzzle 1](https://github.com/ubilab-escape/first-door/blob/master/flow%20charts/Master_globe_flowchart.png)
 
 
